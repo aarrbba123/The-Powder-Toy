@@ -19,7 +19,7 @@ void Element::Element_DT()
 	HotAir = 0.000f	* CFDS;
 	Falldown = 1;
 
-	Flammable = 10;
+	Flammable = 20;
 	Explosive = 0;
 	Meltable = 0;
 	Hardness = 30;
