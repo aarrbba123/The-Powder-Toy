@@ -1,5 +1,3 @@
-/*
-
 #include "simulation/ElementCommon.h"
 
 static int update(UPDATE_FUNC_ARGS);
@@ -9,10 +7,10 @@ void Element::Element_BACT()
 {
 	Identifier = "DEFAULT_PT_BACT";
 	Name = "BACT";
-	Colour = PIXPACK(0x990000);
+	Colour = PIXPACK(0xF433FF);
 	MenuVisible = 1;
 	MenuSection = SC_BIO;
-	Enabled = 0;
+	Enabled = 1;
 
 	Advection = 0.6f;
 	AirDrag = 0.01f * CFDS;
@@ -20,7 +18,7 @@ void Element::Element_BACT()
 	Loss = 0.95f;
 	Collision = 0.0f;
 	Gravity = 0.1f;
-	Diffusion = 0.00f;
+	Diffusion = 0.10f;
 	HotAir = 0.000f  * CFDS;
 	Falldown = 2;
 
@@ -29,13 +27,13 @@ void Element::Element_BACT()
 	Meltable = 0;
 	Hardness = 20;
 
-	Weight = 35;
+	Weight = 10;
 	DefaultProperties.bio.health = 500;
 	DefaultProperties.temp = R_TEMP - 2.0f + 273.15f;
 	HeatConduct = 29;
 	Description = "Bacteria. Infects living things (genes stored in tmp) (WIP).";
 
-	Properties = TYPE_LIQUID|PROP_NEUTPENETRATE|TYPE_BIO;
+	Properties = TYPE_LIQUID|PROP_NEUTPENETRATE|TYPE_BIO|TYPE_DISEASE;
 
 	LowPressure = IPL;
 	LowPressureTransition = NT;
@@ -57,7 +55,7 @@ static int update(UPDATE_FUNC_ARGS)
     rx =  RNG::Ref().between(-2, 2);
     ry =  RNG::Ref().between(-2, 2);
 
-    // O2 use by blood itself (made very slow for somewhat accuracy)
+    // O2 use itself (made very slow for somewhat accuracy)
     if (RNG::Ref().chance(1, 1000)){
 
 		if (parts[i].bio.o2 > 0){
@@ -65,6 +63,8 @@ static int update(UPDATE_FUNC_ARGS)
 			parts[i].bio.co2 += 1;
 		}
     }
+	
+	
 
     
     if (BOUNDS_CHECK && (rx || ry))
@@ -72,47 +72,25 @@ static int update(UPDATE_FUNC_ARGS)
         r = pmap[y+ry][x+rx];
 
 		int t = TYP(r);
-		int ir = ID(r);
+		int ir = ID(r); 
 
 		if (r){
-			// Oxygen collection
-			if (parts[i].bio.o2 < 10 && t == PT_O2){
-				parts[i].bio.o2 += 5;
-				sim->part_change_type(ID(r), x, y, PT_NONE);
-			}
-			// Diffusion into surrounding blood
-			/*
-			else if (t == PT_BLD){
-				if (parts[i].bio.o2 > parts[ir].bio.o2){
-					parts[i].bio.o2--;
-					parts[ir].bio.o2++;
+			// Steal O2 and offload CO2
+			if (t != PT_BACT && sim->elements[t].Properties & TYPE_BIO){
+				// Take oxygen
+				if (parts[ir].bio.o2 > 0 && parts[i].bio.o2 < (MAX_O2 * 4)){
+					parts[ir].bio.o2--;
+					parts[i].bio.o2++;
 				}
-				if (parts[i].bio.co2 > parts[ir].bio.co2){
+				// Give co2
+				if (parts[i].bio.co2 > 0){
 					parts[i].bio.co2--;
 					parts[ir].bio.co2++;
 				}
-			}
-			*\
-			// Transfer to biological tissues
-			
-			else if (sim->elements[t].Properties & TYPE_BIO){
-				// Give oxygen
-				if (t != PT_LUNG && parts[i].bio.o2 > 0 && parts[ir].bio.o2 < MAX_O2){
-					parts[i].bio.o2--;
-					parts[ir].bio.o2++;
-				}
-				// Take co2
-				if (parts[i].bio.co2 < MAX_CO2 && parts[ir].bio.co2 > 0){
-					parts[i].bio.co2++;
-					parts[ir].bio.co2--;
-				}
-				// Kill foreign biological objects (Immune system), weakened with damage.
-				if (t == PT_TUMOR){
-					// Real world immune system is bad at handling cancer
-					if (RNG::Ref().chance(parts[i].bio.health, 1000000)){
-						sim->kill_part(ir);
-					}
-				}
+
+				// Kill other cells for resources
+				parts[ir].bio.health -= 5;
+				parts[i].bio.o2 += 2;
 			}
 		}
 	}
@@ -126,7 +104,7 @@ static int update(UPDATE_FUNC_ARGS)
 			parts[i].bio.health -= damage;
 		}
 		// Damage check
-		if (parts[i].bio.co2 > MAX_CO2 || parts[i].bio.o2 < 1){
+		if (parts[i].bio.co2 > MAX_CO2 * 4 || parts[i].bio.o2 < 1){
 			parts[i].bio.health--;
 		}
 		// Otherwise heal
@@ -143,6 +121,35 @@ static int update(UPDATE_FUNC_ARGS)
 		sim->part_change_type(i, x, y, PT_DT);
 	}
 
+	// Multiply check
+	if (RNG::Ref().chance(1, 200)){
+
+		rx =  RNG::Ref().between(-3, 3);
+    	ry =  RNG::Ref().between(-3, 3);
+
+		if (parts[i].bio.o2 > (MAX_O2 * 3) 
+			&& BOUNDS_CHECK && (rx || ry))
+    	{
+        	r = pmap[y+ry][x+rx];
+			int t = TYP(r);
+			int ir = ID(r);
+
+			// Empty
+			if (t == 0){
+				sim->create_part(ir, x, y, PT_BACT);
+				parts[ir].bio.o2 = MAX_O2;
+				parts[i].bio.o2 = 20;
+				parts[ir].bio.health = 250;
+			}
+			else if (t == PT_DT || t == PT_BLD){
+				sim->part_change_type(ir, x, y, PT_BACT);
+				parts[ir].bio.o2 = MAX_O2;
+				parts[i].bio.o2 = 20;
+				parts[ir].bio.health = 250;
+			}
+		}
+	}
+
 
 	return 0;
 }
@@ -156,9 +163,13 @@ static int graphics(GRAPHICS_FUNC_ARGS)
     int c = cpart->bio.co2;
 
 	int q = cpart->bio.o2;
-	*colr = (int)fmax(9 * o, 75);
-	*colg = 0;
-	*colb = 8 * c;
+
+	int d = o - c;
+
+
+	*colr = (int)fmin(d, 20) * 2;
+	*colg = (int)fmin(d, 20) * 20;
+	*colb = (int)fmin(d, 20) * 12;
 	*pixel_mode |= PMODE_BLUR;
 
 	//*colr = int(*colr * (cpart->bio.health) / 100.0f);
@@ -168,6 +179,7 @@ static int graphics(GRAPHICS_FUNC_ARGS)
 	return 0;
 }
 
+/*
 int evaluateGenes(int gene, int genome)
 {
 	if (gene == 1)
@@ -181,5 +193,6 @@ int modifyGenes(int gene, int newValue, int genome)
 {
 	
 }
-
 */
+
+

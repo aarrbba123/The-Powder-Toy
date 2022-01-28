@@ -206,9 +206,11 @@ simulation_elem_ids = [
 	[ 'SKINS',   204 ],
 	[ 'TUMOR',   205 ],
 	[ 'PSN',   206 ],
-    	[ 'NEUR',   207 ],
+    [ 'NEUR',   207 ],
 	[ 'WACK',   208 ],
 	[ 'WACKY',   209 ],
+	[ 'BACT',   210 ],
+	[ 'WBLD',   211 ],
 ]
 
 simulation_elem_src = []

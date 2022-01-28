@@ -18,7 +18,7 @@ void Element::Element_BLD()
 	Loss = 0.95f;
 	Collision = 0.0f;
 	Gravity = 0.1f;
-	Diffusion = 0.00f;
+	Diffusion = 0.20f;
 	HotAir = 0.000f  * CFDS;
 	Falldown = 2;
 
@@ -27,7 +27,7 @@ void Element::Element_BLD()
 	Meltable = 0;
 	Hardness = 20;
 
-	Weight = 35;
+	Weight = 10;
 	DefaultProperties.bio.health = 500;
 	DefaultProperties.temp = R_TEMP - 2.0f + 273.15f;
 	HeatConduct = 29;
