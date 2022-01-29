@@ -126,7 +126,7 @@ static int update(UPDATE_FUNC_ARGS)
 	}
 
 	// New cell creation
-	if (parts[i].tmp > 500){
+	if (parts[i].tmp > 300){
 		// Resource check
 		if (parts[i].bio.o2 > 10 && parts[i].bio.co2 < 10){
 			parts[i].bio.o2 -= 10;
