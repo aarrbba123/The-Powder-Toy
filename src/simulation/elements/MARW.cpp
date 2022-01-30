@@ -126,7 +126,7 @@ static int update(UPDATE_FUNC_ARGS)
 	}
 
 	// New cell creation
-	if (parts[i].tmp > 300){
+	if (parts[i].life > 300){
 		// Resource check
 		if (parts[i].bio.o2 > 10 && parts[i].bio.co2 < 10){
 			parts[i].bio.o2 -= 10;
@@ -136,7 +136,7 @@ static int update(UPDATE_FUNC_ARGS)
 	}
 
 	// Incrament time since last WBLD seen
-	parts[i].tmp++;
+	parts[i].life++;
 
 	// Check for existing cells
 	for (rx=-5; rx<=5; rx++)
@@ -148,7 +148,7 @@ static int update(UPDATE_FUNC_ARGS)
 					continue;
 				if (TYP(r)==PT_WBLD)
 				{
-					parts[i].tmp = 0;
+					parts[i].life = 0;
 				}
 			}	
 
