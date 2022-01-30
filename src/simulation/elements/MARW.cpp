@@ -165,7 +165,7 @@ static int graphics(GRAPHICS_FUNC_ARGS)
 
 	*colr = (int)fmax(7 * o, 100);
 	*colg = 0;
-	*colb = (int)fmax(3 * o, 30);
+	*colb = (int)fmax(5 * o, 30);
 	*pixel_mode |= PMODE_BLUR;
 
 	// Life mix
