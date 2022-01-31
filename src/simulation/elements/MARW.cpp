@@ -125,7 +125,7 @@ static int update(UPDATE_FUNC_ARGS)
 		sim->part_change_type(i, x, y, PT_DT);
 	}
 
-	// New cell creation
+	// New WBLD creation
 	if (
 		parts[i].life > 300 &&
 		parts[i].bio.o2 > 10 &&
@@ -154,18 +154,44 @@ static int update(UPDATE_FUNC_ARGS)
 	parts[i].life++;
 
 	// Check for existing cells
+	int bldNear = 0;
 	for (rx=-5; rx<=5; rx++)
 		for (ry=-5; ry<=5; ry++)
 			if (BOUNDS_CHECK && (rx || ry))
 			{
 				r = pmap[y+ry][x+rx];
+				if (
+					TYP(r) == PT_BLD
+				){
+					bldNear++;
+				}
 				if (!r)
 					continue;
-				if (TYP(r)==PT_WBLD)
+				if (TYP(r) == PT_WBLD)
 				{
 					parts[i].life = 0;
 				}
-			}	
+			}
+
+	// New BLD creation
+	if (
+		bldNear < 2 &&
+		parts[i].bio.o2 > 5 &&
+		parts[i].bio.co2 < MAX_CO2 - 5
+	){
+		rx =  RNG::Ref().between(-1, 1);
+    		ry =  RNG::Ref().between(-1, 1);
+
+		r = pmap[y+ry][x+rx];
+		int t = TYP(r);
+		int ir = ID(r);
+
+		if (t == 0){
+			sim->create_part(-1, x + rx, y + ry, PT_WATR);
+			parts[i].bio.o2 -= 5;
+			parts[i].bio.co2 += 5;
+		}
+}
 
 	return 0;
 }
