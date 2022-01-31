@@ -187,7 +187,7 @@ static int update(UPDATE_FUNC_ARGS)
 		int ir = ID(r);
 
 		if (t == 0){
-			sim->create_part(-1, x + rx, y + ry, PT_WATR);
+			sim->create_part(-1, x + rx, y + ry, PT_BLD);
 			parts[i].bio.o2 -= 5;
 			parts[i].bio.co2 += 5;
 		}
