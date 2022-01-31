@@ -126,12 +126,27 @@ static int update(UPDATE_FUNC_ARGS)
 	}
 
 	// New cell creation
-	if (parts[i].life > 300){
-		// Resource check
-		if (parts[i].bio.o2 > 10 && parts[i].bio.co2 < 10){
+	if (
+		parts[i].life > 300 &&
+		parts[i].bio.o2 > 10 &&
+		parts[i].bio.co2 < 10
+	){
+		rx =  RNG::Ref().between(-1, 1);
+    		ry =  RNG::Ref().between(-1, 1);
+
+		r = pmap[y+ry][x+rx];
+		int t = TYP(r);
+		int ir = ID(r);
+
+		if (t == 0){
+			sim->create_part(-1, x + rx, y + ry, PT_WBLD);
 			parts[i].bio.o2 -= 10;
 			parts[i].bio.co2 += 10;
-			sim->create_part(-1, x + RNG::Ref().between(-1, 1), y + RNG::Ref().between(-1, 1), PT_WBLD);
+		}
+		else if (t == PT_BLD){
+			sim->part_change_type(ir, x + rx, y + ry, PT_WBLD);
+			parts[i].bio.o2 -= 10;
+			parts[i].bio.co2 += 10;
 		}
 	}
 
