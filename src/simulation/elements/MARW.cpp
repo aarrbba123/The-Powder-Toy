@@ -129,7 +129,7 @@ static int update(UPDATE_FUNC_ARGS)
 	if (
 		parts[i].life > 300 &&
 		parts[i].bio.o2 > 10 &&
-		parts[i].bio.co2 < 10
+		parts[i].bio.co2 < MAX_CO2 - 10
 	){
 		rx =  RNG::Ref().between(-1, 1);
     		ry =  RNG::Ref().between(-1, 1);
