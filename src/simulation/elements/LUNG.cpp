@@ -73,7 +73,7 @@ static int update(UPDATE_FUNC_ARGS)
 
         if (r) {
 			// Oxygen collection (more efficient than BLD)
-			if (parts[i].bio.o2 < 75 && TYP(r) == PT_O2 || parts[i].bio.co2 > 50 && TYP(r) == PT_O2){
+			if (parts[i].bio.o2 < 75 && TYP(r) == PT_O2){
 				parts[i].bio.o2 += 20;
 
 				// Replace with CO2 (if present)
