@@ -919,49 +919,66 @@ int GameView::Record(bool record)
 
 void GameView::updateToolButtonScroll()
 {
-	if(toolButtons.size())
+	if (toolButtons.size())
 	{
-		int x = currentMouse.X, y = currentMouse.Y;
-		int newInitialX = WINDOWW-56;
-		int totalWidth = (toolButtons[0]->Size.X+1)*toolButtons.size();
-		int scrollSize = (int)(((float)(XRES-BARSIZE))/((float)totalWidth) * ((float)XRES-BARSIZE));
-		if (scrollSize>XRES-1)
-			scrollSize = XRES-1;
-		if(totalWidth > XRES-15)
-		{
+		int x = currentMouse.X;
+		int y = currentMouse.Y;
+
+		int offsetDelta = 0;
+
+		int newInitialX = WINDOWW - 56;
+		int totalWidth = (toolButtons[0]->Size.X + 1) * toolButtons.size();
+		int scrollSize = (int)(((float)(XRES - BARSIZE))/((float)totalWidth) * ((float)XRES - BARSIZE));
+
+		if (scrollSize > XRES - 1)
+			scrollSize = XRES - 1;
+		
+		if (totalWidth > XRES - 15)
+		{			
 			int mouseX = x;
-			if(mouseX > XRES)
+
+			float overflow = 0;
+			float mouseLocation = 0;
+
+			if (mouseX > XRES)
 				mouseX = XRES;
-			//if (mouseX < 15) //makes scrolling a little nicer at edges but apparently if you put hundreds of elements in a menu it makes the end not show ...
-			//	mouseX = 15;
 
-			scrollBar->Position.X = (int)(((float)mouseX/((float)XRES))*(float)(XRES-scrollSize));
+			// if (mouseX < 15) // makes scrolling a little nicer at edges but apparently if you put hundreds of elements in a menu it makes the end not show ...
+			// 	mouseX = 15;
 
-			float overflow = float(totalWidth-(XRES-BARSIZE)), mouseLocation = float(XRES-3)/float((XRES-2)-mouseX); //mouseLocation adjusted slightly in case you have 200 elements in one menu
+			scrollBar->Visible = true;
 
-			newInitialX += int(overflow/mouseLocation);
+			scrollBar->Position.X = (int)(((float)mouseX / (float)XRES) * (float)(XRES - scrollSize)) + 1;
+
+			overflow = (float)(totalWidth - (XRES - BARSIZE));
+			mouseLocation = (float)(XRES - 3)/(float)((XRES - 2) - mouseX); // mouseLocation adjusted slightly in case you have 200 elements in one menu
+
+			newInitialX += (int)(overflow/mouseLocation);
 		}
 		else
 		{
-			scrollBar->Position.X = 1;
+			scrollBar->Visible = false;
 		}
-		scrollBar->Size.X=scrollSize;
-		int offsetDelta = toolButtons[0]->Position.X - newInitialX;
-		for(auto *button : toolButtons)
+
+		scrollBar->Size.X = scrollSize - 1;
+
+		offsetDelta = toolButtons[0]->Position.X - newInitialX;
+
+		for (auto *button : toolButtons)
 		{
 			button->Position.X -= offsetDelta;
-			if (button->Position.X+button->Size.X <= 0 || (button->Position.X+button->Size.X) > XRES-2)
+			if (button->Position.X + button->Size.X <= 0 || (button->Position.X + button->Size.X) > XRES - 2)
 				button->Visible = false;
 			else
 				button->Visible = true;
 		}
 
-		//Ensure that mouseLeave events are make their way to the buttons should they move from underneath the mouse pointer
-		if(toolButtons[0]->Position.Y < y && toolButtons[0]->Position.Y+toolButtons[0]->Size.Y > y)
+		// Ensure that mouseLeave events are make their way to the buttons should they move from underneath the mouse pointer
+		if (toolButtons[0]->Position.Y < y && toolButtons[0]->Position.Y + toolButtons[0]->Size.Y > y)
 		{
-			for(auto *button : toolButtons)
+			for (auto *button : toolButtons)
 			{
-				if(button->Position.X < x && button->Position.X+button->Size.X > x)
+				if (button->Position.X < x && button->Position.X + button->Size.X > x)
 					button->OnMouseEnter(x, y);
 				else
 					button->OnMouseLeave(x, y);
@@ -2147,22 +2164,15 @@ void GameView::OnDraw()
 				{
 					sampleInfo << "Molten " << c->ElementResolve(ctype, 0);
 				}
-				else if (c->IsBio(type))
-				{
-					sampleInfo << c->ElementResolve(type, 0) << ", O2: " << sample.particle.bio.o2 << ", CO2: " << sample.particle.bio.co2 << ", Health: " << sample.particle.bio.health;
-					// I give up trying to fix this
-					// sampleInfo << "\n" << c->BasicParticleInfo(sample.particle); //If this doesn't work, I'm going to give up and just have it not display the stuff below.
-					// sampleInfo << "Max Health: " << sample.particle.bio.maxHealth << ", Radiation Damage: " << sample.particle.bio.radDamage;
-				}
 				else if ((type == PT_PIPE || type == PT_PPIP) && c->IsValidElement(ctype))
 				{
-					if (ctype == PT_LAVA && c->IsValidElement((int)sample.particle.pavg[1]))
+					if (ctype == PT_LAVA && c->IsValidElement(sample.particle.tmp4))
 					{
-						sampleInfo << c->ElementResolve(type, 0) << " with molten " << c->ElementResolve((int)sample.particle.pavg[1], -1);
+						sampleInfo << c->ElementResolve(type, 0) << " with molten " << c->ElementResolve(sample.particle.tmp4, -1);
 					}
 					else
 					{
-						sampleInfo << c->ElementResolve(type, 0) << " with " << c->ElementResolve(ctype, (int)sample.particle.pavg[1]);
+						sampleInfo << c->ElementResolve(type, 0) << " with " << c->ElementResolve(ctype, sample.particle.tmp4);
 					}
 				}
 				else if (type == PT_LIFE)
@@ -2196,9 +2206,7 @@ void GameView::OnDraw()
 						sampleInfo << " (" << ctype << ")";
 				}
 				sampleInfo << ", Temp: " << (sample.particle.temp - 273.15f) << " C";
-				if (type != PT_BVES){ // BVES uses special life (tmp5)
-					sampleInfo << ", Life: " << sample.particle.life;
-				}
+				sampleInfo << ", Life: " << sample.particle.life;
 				if (sample.particle.type != PT_RFRG && sample.particle.type != PT_RFGL && sample.particle.type != PT_LIFE)
 				{
 					if (sample.particle.type == PT_CONV)
@@ -2225,7 +2233,7 @@ void GameView::OnDraw()
 			}
 			else
 			{
-				sampleInfo << "\n" << c->BasicParticleInfo(sample.particle);
+				sampleInfo << c->BasicParticleInfo(sample.particle);
 				sampleInfo << ", Temp: " << sample.particle.temp - 273.15f << " C";
 				sampleInfo << ", Pressure: " << sample.AirPressure;
 			}

@@ -6,6 +6,7 @@
 #include <cstddef>
 #include <vector>
 #include <array>
+#include <memory>
 
 #include "Particle.h"
 #include "Stickman.h"
@@ -114,15 +115,15 @@ public:
 	int sandcolour_frame;
 	int deco_space;
 
-	int Load(GameSave * save, bool includePressure);
-	int Load(GameSave * save, bool includePressure, int x, int y);
+	int Load(const GameSave * save, bool includePressure);
+	int Load(const GameSave * save, bool includePressure, int x, int y);
 	GameSave * Save(bool includePressure);
 	GameSave * Save(bool includePressure, int x1, int y1, int x2, int y2);
 	void SaveSimOptions(GameSave * gameSave);
 	SimulationSample GetSample(int x, int y);
 
-	Snapshot * CreateSnapshot();
-	void Restore(const Snapshot & snap);
+	std::unique_ptr<Snapshot> CreateSnapshot();
+	void Restore(const Snapshot &snap);
 
 	int is_blocking(int t, int x, int y);
 	int is_boundary(int pt, int x, int y);
@@ -134,10 +135,10 @@ public:
 	int eval_move(int pt, int nx, int ny, unsigned *rr);
 	void init_can_move();
 	bool IsWallBlocking(int x, int y, int type);
-	bool IsElement(int type) {
+	bool IsElement(int type) const {
 		return (type > 0 && type < PT_NUM && elements[type].Enabled);
 	}
-	bool IsElementOrNone(int type) {
+	bool IsElementOrNone(int type) const {
 		return (type >= 0 && type < PT_NUM && elements[type].Enabled);
 	}
 	void create_cherenkov_photon(int pp);
@@ -220,8 +221,8 @@ public:
 	static int remainder_p(int x, int y);
 	static float remainder_p(float x, float y);
 
-	String ElementResolve(int type, int ctype);
-	String BasicParticleInfo(Particle const &sample_part);
+	String ElementResolve(int type, int ctype) const;
+	String BasicParticleInfo(Particle const &sample_part) const;
 
 
 	struct CustomGOLData
@@ -240,6 +241,7 @@ private:
 
 public:
 	const CustomGOLData *GetCustomGOLByRule(int rule) const;
+	const std::vector<CustomGOLData> GetCustomGol() { return customGol; }
 	void SetCustomGOL(std::vector<CustomGOLData> newCustomGol);
 
 private:

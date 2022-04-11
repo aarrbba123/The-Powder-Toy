@@ -31,8 +31,6 @@
 #define PROP_SPARKSETTLE	0x20000  //2^17 Allow Sparks/Embers to settle
 #define PROP_NOAMBHEAT		0x40000  //2^18 Don't transfer or receive heat from ambient heat.
 #define PROP_NOCTYPEDRAW	0x100000 // 2^20 When this element is drawn upon with, do not set ctype (like BCLN for CLNE)
-#define TYPE_BIO            0x200000 // 2^21 Flag for biological materials
-#define TYPE_DISEASE        0x400000 // 2^22 Flag for immune-targeted materials
 
 #define FLAG_STAGNANT	0x1
 #define FLAG_SKIPMOVE  0x2 // skip movement for one frame, only implemented for PHOT
