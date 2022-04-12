@@ -1,3 +1,4 @@
+//BVES is about to give out some high quality issues with high quality headaches after the PAVG conversion since tmp3 is used before that.
 #include "simulation/ElementCommon.h"
 //Temp particle used for graphics
 Particle btpart;
@@ -128,16 +129,16 @@ int Element_BVES_update(UPDATE_FUNC_ARGS)
     // O2 use
     if (RNG::Ref().chance(1, 300)){
 
-		if (parts[i].pavg[0] > 0){
-        	parts[i].pavg[0] -= 1;
-			parts[i].pavg[1] += 1;
+		if (parts[i].tmp3 > 0){
+        	parts[i].tmp3 -= 1;
+			parts[i].tmp4 += 1;
 		}
     }
 
     // Take O2 from blood within pipe
     if (parts[i].ctype == PT_BLD){
-        if (parts[i].pavg[0] < MAX_O2 && parts[i].tmp4 > 0){
-            parts[i].pavg[0] += 1;
+        if (parts[i].tmp3 < MAX_O2 && parts[i].tmp4 > 0){
+            parts[i].tmp3 += 1;
             parts[i].tmp4 -= 1;
         }
     }
@@ -153,8 +154,8 @@ int Element_BVES_update(UPDATE_FUNC_ARGS)
 
         if (r) {
             if (sim->elements[TYP(r)].Properties & TYPE_BIO){
-                if (parts[i].pavg[0] > parts[ir].tmp){
-                    parts[i].pavg[0].tmp -= 1;
+                if (parts[i].tmp3 > parts[ir].tmp){
+                    parts[i].tmp3.tmp -= 1;
                     parts[ir].tmp++;
                 }
                 if (parts[i].tmp2 > parts[ir].tmp2){
@@ -168,7 +169,7 @@ int Element_BVES_update(UPDATE_FUNC_ARGS)
 
     if (RNG::Ref().chance(1, 50)){
         // Health stuff
-        if (parts[i].tmp5 > 0 && parts[i].pavg[0] < 1){
+        if (parts[i].tmp5 > 0 && parts[i].tmp3 < 1){
             parts[i].tmp5 -= 1;
         }
         else{
@@ -464,8 +465,8 @@ int Element_BVES_graphics(GRAPHICS_FUNC_ARGS)
 			btpart.type = t;
 			btpart.temp = cpart->temp;
 			btpart.life = cpart->tmp2;
-			btpart.tmp = int(cpart->pavg[0]);
-			btpart.ctype = int(cpart->pavg[1]);
+			btpart.tmp = int(cpart->tmp3);
+			btpart.ctype = int(cpart->tmp4);
 			if (t == PT_PHOT && btpart.ctype == 0x40000000)
 				btpart.ctype = 0x3FFFFFFF;
 
@@ -527,8 +528,8 @@ void Element_BVES_transfer_bves_to_part(Simulation * sim, Particle *bves, Partic
 	}
 	part->temp = bves->temp;
 	part->life = bves->tmp2;
-	part->tmp = int(bves->pavg[0]);
-	part->ctype = int(bves->pavg[1]);
+	part->tmp = int(bves->tmp3);
+	part->ctype = int(bves->tmp4);
     part->bio = bves->bio;
 
 	if (!(sim->elements[part->type].Properties & TYPE_ENERGY))
@@ -548,8 +549,8 @@ static void transfer_part_to_bves(Particle *part, Particle *bves)
 	bves->ctype = part->type;
 	bves->temp = part->temp;
 	bves->tmp2 = part->life;
-	bves->pavg[0] = float(part->tmp);
-	bves->pavg[1] = float(part->ctype);
+	bves->tmp3 = float(part->tmp);
+	bves->tmp4 = float(part->ctype);
     bves->bio = part->bio;
 }
 
@@ -568,8 +569,8 @@ static void transfer_bves_to_bves(Particle *src, Particle *dest, bool STOR)
 	}
 	dest->temp = src->temp;
 	dest->tmp2 = src->tmp2;
-	dest->pavg[0] = src->pavg[0];
-	dest->pavg[1] = src->pavg[1];
+	dest->tmp3 = src->tmp3;
+	dest->tmp4 = src->tmp4;
     dest->bio = src->bio;
 }
 

@@ -2164,6 +2164,13 @@ void GameView::OnDraw()
 				{
 					sampleInfo << "Molten " << c->ElementResolve(ctype, 0);
 				}
+				else if (c->IsBio(type))
+				{
+					sampleInfo << c->ElementResolve(type, 0) << ", O2: " << sample.particle.bio.o2 << ", CO2: " << sample.particle.bio.co2 << ", Health: " << sample.particle.bio.health;
+					// I give up trying to fix this
+					// sampleInfo << "\n" << c->BasicParticleInfo(sample.particle); //If this doesn't work, I'm going to give up and just have it not display the stuff below.
+					// sampleInfo << "Max Health: " << sample.particle.bio.maxHealth << ", Radiation Damage: " << sample.particle.bio.radDamage;
+				}
 				else if ((type == PT_PIPE || type == PT_PPIP) && c->IsValidElement(ctype))
 				{
 					if (ctype == PT_LAVA && c->IsValidElement(sample.particle.tmp4))
@@ -2207,6 +2214,9 @@ void GameView::OnDraw()
 				}
 				sampleInfo << ", Temp: " << (sample.particle.temp - 273.15f) << " C";
 				sampleInfo << ", Life: " << sample.particle.life;
+				if (type != PT_BVES){ // BVES uses special life (tmp5)
+					sampleInfo << ", Life: " << sample.particle.life;
+				}
 				if (sample.particle.type != PT_RFRG && sample.particle.type != PT_RFGL && sample.particle.type != PT_LIFE)
 				{
 					if (sample.particle.type == PT_CONV)

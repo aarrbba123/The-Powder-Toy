@@ -14,6 +14,7 @@
 #include "common/tpt-minmax.h"
 
 #include "ElementDefs.h"
+#include "BioData.h"
 #include "ElementClasses.h"
 #include "Particle.h"
 #include "ElementGraphics.h"
