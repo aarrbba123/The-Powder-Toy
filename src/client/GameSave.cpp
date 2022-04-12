@@ -1384,6 +1384,8 @@ void GameSave::readOPS(char * data, int dataLength)
 							particles[newIndex].tmp3 = int(tmp3);
 						}
 					}
+					//BIOLOGY stuff here
+					particles[newIndex].bio.health = 100;
 					//note: PSv was used in version 77.0 and every version before, add something in PSv too if the element is that old
 					newIndex++;
 					partsCount++;
