@@ -29,7 +29,6 @@ void Element::Element_LUNG()
 
 	Weight = 150;
 
-	DefaultProperties.bio.health = 100;
 	DefaultProperties.temp = R_TEMP - 2.0f + 273.15f;
 	HeatConduct = 29;
 	Description = "Lung. Peforms gas exchange with Blood (BLD).";
@@ -47,39 +46,45 @@ void Element::Element_LUNG()
 
 	Update = &update;
 	Graphics = &graphics;
+
+	// Bio stuff
+
+	Max_O2 = 500;
+	Max_CO2 = 500;
+	Max_Health = 150;
+
+	DefaultProperties.bio.o2 = Max_O2;
+	DefaultProperties.bio.co2 = 0;
+	DefaultProperties.bio.health = Max_Health;
 }
 
 static int update(UPDATE_FUNC_ARGS)
 {
+    // O2 use by lung itself
+	Biology::UseO2(200, UPDATE_FUNC_IN);
+
 	int r, rx, ry;
 
     rx =  RNG::Ref().between(-2, 2);
     ry =  RNG::Ref().between(-2, 2);
 
-    // O2 use by lung itself
-    if (RNG::Ref().chance(1, 200)){
-
-		if (parts[i].bio.o2 > 0){
-        	parts[i].bio.o2 -= 1;
-			parts[i].bio.co2 += 1;
-		}
-    }
-
-    
     if (BOUNDS_CHECK && (rx || ry))
     {
         r = pmap[y+ry][x+rx];
 		int ir = ID(r);
 
         if (r) {
+
+			int targetMaxO2 = sim->elements[parts[i].type].Max_O2;
+
 			// Oxygen collection (more efficient than BLD)
-			if (parts[i].bio.o2 < 75 && TYP(r) == PT_O2){
-				parts[i].bio.o2 += 20;
+			if (parts[i].bio.o2 < targetMaxO2 && TYP(r) == PT_O2){
+				parts[i].bio.o2 += 50;
 
 				// Replace with CO2 (if present)
 				if (parts[i].bio.co2 > 0){
 					sim->part_change_type(ID(r), x, y, PT_CO2);
-					parts[i].bio.co2 -= 25;
+					parts[i].bio.co2 -= 50;
 				}
 				else{
 					sim->part_change_type(ID(r), x, y, PT_NONE);
@@ -88,57 +93,32 @@ static int update(UPDATE_FUNC_ARGS)
 			// Blood interactions
 			else if (TYP(r) == PT_BLD || parts[ir].ctype == PT_BLD){
 				// Give oxygen
-				if (parts[ir].bio.o2 < MAX_O2 && parts[i].bio.o2 > 0 && parts[i].bio.o2 > parts[ir].bio.o2){
-					parts[ir].bio.o2 += 2;
-					parts[i].bio.o2 -= 2;
+				if (parts[i].bio.o2 > 0 && parts[i].bio.o2 > parts[ir].bio.o2){
+					parts[ir].bio.o2 += 5;
+					parts[i].bio.o2 -= 5;
 				}
 
 				// Take CO2
 				if (parts[ir].bio.co2 > 0){
-					parts[i].bio.co2 += 2;
-					parts[ir].bio.co2 -= 2;
-				}
-			}
-			// Diffuse among self
-			else if (TYP(r) == PT_LUNG){
-
-				for (int zz = 0; zz < 3; zz++){
-					if (parts[i].bio.o2 > parts[ir].bio.o2){
-						parts[i].bio.o2--;
-						parts[ir].bio.o2++;
-					}
-					if (parts[i].bio.co2 > parts[ir].bio.co2){
-						parts[i].bio.co2--;
-						parts[ir].bio.co2++;
-					}
+					parts[i].bio.co2 += 5;
+					parts[ir].bio.co2 -= 5;
 				}
 			}
 		}
     }
 
-	// Health management
-	if (RNG::Ref().chance(1, 50)){
-		// Temp check
-		if (parts[i].temp > 323.15){
-			int damage = (parts[i].temp - 315) / 5;
-			parts[i].bio.health -= damage;
-		}
-		// Damage check
-		if (parts[i].bio.co2 > 100 || parts[i].bio.o2 < 1){
-			parts[i].bio.health--;
-		}
-		// Otherwise heal
-		else{
-			if (parts[i].bio.health < 100){
-				parts[i].bio.health++;
-			}
-		}
-	}
-
+	// Diffuse resources
+	Biology::DiffuseResources(1, 2, UPDATE_FUNC_IN);
+	// Radiation damage
+	Biology::DoRadiationDamage(2, 2, UPDATE_FUNC_IN);
+	// Damage from extreme heat or cold
+	Biology::DoHeatDamage(5, 323.15, 0, UPDATE_FUNC_IN);
+	// Damage from lack of O2 or too much CO2
+	Biology::DoRespirationDamage(100, UPDATE_FUNC_IN);
+	// Heal naturally
+	Biology::DoHealing(100, UPDATE_FUNC_IN);
 	// Death check
-	if (parts[i].bio.health < 1){
-		sim->part_change_type(i, x, y, PT_DT);
-	}
+	Biology::HandleDeath(UPDATE_FUNC_IN);
 
 	return 0;
 }

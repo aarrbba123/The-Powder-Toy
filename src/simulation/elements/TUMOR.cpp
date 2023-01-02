@@ -29,12 +29,11 @@ void Element::Element_TUMOR()
 
 	Weight = 150;
 
-	DefaultProperties.bio.health = 150; // In real life, cancer survives better than regular tissue (citation: HeLa)
 	DefaultProperties.temp = R_TEMP - 2.0f + 273.15f;
 	HeatConduct = 29;
 	Description = "Tumor. Certain death/blobification for biology";
 
-	Properties = TYPE_SOLID|PROP_NEUTPENETRATE|TYPE_BIO;
+	Properties = TYPE_SOLID|PROP_NEUTPENETRATE|TYPE_BIO|TYPE_DISEASE;
 
 	LowPressure = IPL;
 	LowPressureTransition = NT;
@@ -47,97 +46,61 @@ void Element::Element_TUMOR()
 
 	Update = &update;
 	Graphics = &graphics;
+
+	// Bio stuff
+	Max_O2 = 100;
+	Max_CO2 =  100;
+
+	DefaultProperties.bio.health = 250; // In real life, cancer survives better than regular tissue (citation: HeLa)
+	DefaultProperties.bio.o2 = Max_O2;
+	DefaultProperties.bio.co2 = 0;
 }
 
 static int update(UPDATE_FUNC_ARGS)
 {
+	// O2 use itself (Increased due to increased biological activity)
+    Biology::UseO2(100, UPDATE_FUNC_IN);
+	// Steal resources from biological material
+	Biology::StealResources(2, 2, UPDATE_FUNC_IN);
+
 	int r, rx, ry;
 
     rx =  RNG::Ref().between(-2, 2);
     ry =  RNG::Ref().between(-2, 2);
-
-    // O2 use by tumor itself (Increased due to increased biological activity)
-    if (RNG::Ref().chance(1, 100)){
-
-		if (parts[i].bio.o2 > 0){
-        	parts[i].bio.o2 -= 1;
-                parts[i].bio.co2 += 1;
-		}
-    }
-
     
-    if (BOUNDS_CHECK && (rx || ry))
+    if (RNG::Ref().chance(1, 2000) && (BOUNDS_CHECK && (rx || ry)))
     {
         r = pmap[y+ry][x+rx];
-        if (r) {
-			if (RNG::Ref().chance(1, 2)){
-				// Diffuse among tumor
-				if (TYP(r) == PT_TUMOR){
-					int ir = ID(r);
+		int target = ID(r);
+		int target_type = parts[target].type;
 
-					if (parts[i].bio.o2 > parts[ir].bio.o2){
-						parts[i].bio.o2--;
-						parts[ir].bio.o2++;
-					}
-					if (parts[i].bio.co2 > parts[ir].bio.co2){
-						parts[i].bio.co2--;
-						parts[ir].bio.co2++;
-					}
-				}
-				// steal o2 from bio, offload co2 to bio (tumor is greedy)
-				if (sim->elements[TYP(r)].Properties & TYPE_BIO){
-					int ir = ID(r);
-					
-					if (parts[ir].bio.o2 > 1){
-						parts[i].bio.o2++;
-						parts[ir].bio.o2--;
-					}
-					if (parts[i].bio.co2 > 0){
-						parts[i].bio.co2--;
-						parts[ir].bio.co2++;
-					}
-				}
-				if (TYP(r) == PT_BLD && RNG::Ref().chance(1, 1000)){
-					int ir = ID(r);
-					parts[ir].ctype = PT_TUMOR;
-				}
-			}
+        if (r) {
+			// Metastasize
+			if (target_type == PT_BLD){
+				parts[target].ctype = PT_TUMOR;
+			}	
         }
     }
 	if (RNG::Ref().chance(1, 100)){
+
+		r = pmap[y+ry][x+rx];
+		int target = ID(r);
+		int target_type = parts[target].type;
+
 		// convert biology to tumor (grow)
-		if (sim->elements[TYP(r)].Properties & TYPE_BIO && TYP(r) != PT_TUMOR){
-			int ir = ID(r);
-			sim->part_change_type(ir, parts[ir].x, parts[ir].y, PT_TUMOR);
+		if (sim->elements[target_type].Properties & TYPE_BIO && target_type != PT_TUMOR){
+			
+			sim->part_change_type(target, parts[target].x, parts[target].y, PT_TUMOR);
 			parts[i].bio.o2--;
 			parts[i].bio.co2++;
 		}
 	}
 
-	// Health management
-	if (RNG::Ref().chance(1, 50)){
-		// Temp check
-		if (parts[i].temp > 323.15){
-			int damage = (parts[i].temp - 315) / 5;
-			parts[i].bio.health -= damage;
-		}
-		// Damage check
-		if (parts[i].bio.co2 > MAX_CO2 || parts[i].bio.o2 < 1){
-			parts[i].bio.health--;
-		}
-		// Otherwise heal
-		else{
-			// Tumors aren't the most healthy to start with.
-                        if (parts[i].bio.health < 200){ 
-				parts[i].bio.health++;
-			}
-		}
-	}
-
-	// Death check
-	if (parts[i].bio.health < 1){
-		sim->part_change_type(i, x, y, PT_DT);
-	}
+	// Health related things
+	Biology::DoHeatDamage(50, 323.15, 0, UPDATE_FUNC_IN);
+	Biology::DoRespirationDamage(50, UPDATE_FUNC_IN);
+	Biology::DoHealing(50, UPDATE_FUNC_IN);
+	Biology::HandleDeath(UPDATE_FUNC_IN);
 
 	return 0;
 }

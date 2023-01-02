@@ -19,6 +19,8 @@
 #include "ElementGraphics.h"
 #include "Simulation.h"
 
+#include "Biology.h"
+
 #include "graphics/Renderer.h"
 
 #define IPL -257.0f

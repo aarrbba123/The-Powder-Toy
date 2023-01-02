@@ -199,12 +199,18 @@ int Element_BVES_update(UPDATE_FUNC_ARGS)
 					int ir = ID(r);
 
 					if (sim->elements[tr].Properties & TYPE_BIO && tr != PT_BVES){
-						if (parts[i].bio.o2 > 0 && parts[ir].bio.o2 < MAX_O2){
+
+
+						int irMaxO2 = sim->elements[parts[ir].type].Max_O2;
+
+						if (parts[i].bio.o2 > 0 && parts[ir].bio.o2 < irMaxO2){
 							parts[i].bio.o2--;
 							parts[ir].bio.o2++;
 						}
 
-						if (parts[i].bio.co2 < MAX_CO2 && parts[ir].bio.co2 > 0){
+						int iMaxCO2 = sim->elements[parts[i].type].Max_CO2;
+
+						if (parts[i].bio.co2 < iMaxCO2 && parts[ir].bio.co2 > 0){
 							parts[i].bio.co2++;
 							parts[ir].bio.co2--;
 						}

@@ -48,82 +48,34 @@ void Element::Element_MEAT()
 
 	Update = &update;
 	Graphics = &graphics;
+
+	// Bio stuff
+
+	Max_O2 = 100;
+	Max_CO2 = 100;
+	Max_Health = 100;
+
+	DefaultProperties.bio.o2 = Max_O2;
+	DefaultProperties.bio.co2 = 0;
+	DefaultProperties.bio.health = Max_Health;
 }
 
 static int update(UPDATE_FUNC_ARGS)
 {
-	int r, rx, ry;
-	int rad = parts[i].tmp;
-	int max_health = parts[i].tmp2;
-
-    rx =  RNG::Ref().between(-2, 2);
-    ry =  RNG::Ref().between(-2, 2);
-
-    // O2 use by meat itself
-    if (RNG::Ref().chance(1, 150)){
-
-		if (parts[i].bio.o2 > 0){
-        	parts[i].bio.o2 -= 1;
-            parts[i].bio.co2 += 1;
-		}
-    }
-
-    
-    if (BOUNDS_CHECK && (rx || ry))
-    {
-        r = pmap[y+ry][x+rx];
-		int er = sim->photons[y][x];
-        if (r) {
-			if (RNG::Ref().chance(1, 2)){
-				// Diffuse among bio
-				if (sim->elements[TYP(r)].Properties & TYPE_BIO && TYP(r) != PT_BLD){
-					int ir = ID(r);
-
-					if (parts[i].bio.o2 > parts[ir].bio.o2){
-						parts[i].bio.o2--;
-						parts[ir].bio.o2++;
-					}
-					if (parts[i].bio.co2 > parts[ir].bio.co2){
-						parts[i].bio.co2--;
-						parts[ir].bio.co2++;
-					}
-				}
-			}
-			//Radiation damage is back, maybe.
-			if (sim->elements[TYP(r)].MenuSection == SC_NUCLEAR || sim->elements[TYP(er)].MenuSection == SC_NUCLEAR){
-				parts[i].bio.radDamage++;
-				if (RNG::Ref().chance(parts[i].bio.radDamage, 100000)){
-					sim->part_change_type(i, x, y, PT_TUMOR);
-					return 0;
-				}
-			}
-        }
-    }
-
-	// Health management
-	if (RNG::Ref().chance(1, 50)){
-		// Temp check
-		if (parts[i].temp > 323.15){
-			int damage = (parts[i].temp - 315) / 5;
-			parts[i].bio.health -= damage;
-		}
-		// Damage check
-		if (parts[i].bio.co2 > MAX_CO2 || parts[i].bio.o2 < 1){
-			parts[i].bio.health--;
-		}
-		// Otherwise heal
-		else{
-			if (parts[i].bio.health < parts[i].tmp){
-				parts[i].bio.health++;
-			}
-		}
-	}
-
+	// O2 use by cells
+	Biology::UseO2(100, UPDATE_FUNC_IN);
+	// Diffuse resources
+	Biology::DiffuseResources(2, 2, UPDATE_FUNC_IN);
+	// Radiation damage
+	Biology::DoRadiationDamage(2, 2, UPDATE_FUNC_IN);
+	// Damage from extreme heat or cold
+	Biology::DoHeatDamage(5, 323.15, 0, UPDATE_FUNC_IN);
+	// Damage from lack of O2 or too much CO2
+	Biology::DoRespirationDamage(100, UPDATE_FUNC_IN);
+	// Heal naturally
+	Biology::DoHealing(100, UPDATE_FUNC_IN);
 	// Death check
-	if (parts[i].bio.health < 1){
-		sim->part_change_type(i, x, y, PT_DT);
-	}
-	
+	Biology::HandleDeath(UPDATE_FUNC_IN);
 
 	return 0;
 }
@@ -137,9 +89,9 @@ static int graphics(GRAPHICS_FUNC_ARGS)
     // C02
     int c = cpart->bio.co2;
 
-	*colr = (int)fmax(7 * o, 100);
+	*colr = (int)fmax(3 * o, 100);
 	*colg = 0;
-	*colb = (int)fmax(3 * o, 30);
+	*colb = (int)fmax(1 * o, 30);
 	*pixel_mode |= PMODE_BLUR;
 
 	// Life mix

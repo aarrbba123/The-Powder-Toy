@@ -50,99 +50,43 @@ void Element::Element_BLD()
 
 static int update(UPDATE_FUNC_ARGS)
 {
-	int r, rx, ry;
-
-    rx =  RNG::Ref().between(-2, 2);
-    ry =  RNG::Ref().between(-2, 2);
 
     // O2 use by blood itself (made very slow for somewhat accuracy)
-    if (RNG::Ref().chance(1, 1000)){
-
-		if (parts[i].bio.o2 > 0){
-        	parts[i].bio.o2 -= 1;
-			parts[i].bio.co2 += 1;
-		}
-    }
-
-    
-    if (BOUNDS_CHECK && (rx || ry))
-    {
-        r = pmap[y+ry][x+rx];
-
-		int t = TYP(r);
-		int ir = ID(r);
-
-        if (r){
-			// Oxygen collection
-			if (parts[i].bio.o2 < 10 && t == PT_O2){
-				parts[i].bio.o2 += 5;
-				sim->part_change_type(ID(r), x, y, PT_NONE);
-			}
-			// Diffusion into surrounding blood
-			else if (t == PT_BLD){
-				if (parts[i].bio.o2 > parts[ir].bio.o2){
-					parts[i].bio.o2--;
-					parts[ir].bio.o2++;
-				}
-				if (parts[i].bio.co2 > parts[ir].bio.co2){
-					parts[i].bio.co2--;
-					parts[ir].bio.co2++;
-				}
-			}
-			// Transfer to biological tissues
-			else if (sim->elements[t].Properties & TYPE_BIO){
-				// Give oxygen
-				if (t != PT_LUNG && parts[i].bio.o2 > 0 && parts[ir].bio.o2 < MAX_O2){
-					parts[i].bio.o2--;
-					parts[ir].bio.o2++;
-				}
-				// Take co2
-				if (parts[i].bio.co2 < MAX_CO2 && parts[ir].bio.co2 > 0){
-					parts[i].bio.co2++;
-					parts[ir].bio.co2--;
-				}
-				// Kill foreign biological objects (Immune system), weakened with damage.
-				if (t == PT_TUMOR){
-					// Real world immune system is bad at handling cancer
-					if (RNG::Ref().chance(parts[i].bio.health, 1000000)){
-						sim->kill_part(ir);
-					}
-				}
-			}
-		}
-    }
-
-	// Health management
-	if (RNG::Ref().chance(1, 100)){
-
-		// Temp check
-		if (parts[i].temp > 323.15){
-			int damage = (parts[i].temp - 315) / 5;
-			parts[i].bio.health -= damage;
-		}
-		// Damage check
-		if (parts[i].bio.co2 > MAX_CO2 || parts[i].bio.o2 < 1){
-			parts[i].bio.health--;
-		}
-		// Otherwise heal (Why make it not use O2 to heal?)
-		else{
-			if (parts[i].bio.health < 500){
-				parts[i].bio.health++;
-			}
-		}
+    Biology::UseO2(1000, UPDATE_FUNC_IN);
+	// Try to collect O2
+	if (Biology::TryCollect(2, 1, PT_O2, UPDATE_FUNC_IN)){
+		parts[i].bio.o2 += 5;
 	}
-
+	// Diffuse resources
+	Biology::DiffuseResources(1, 2, UPDATE_FUNC_IN);
+	// Radiation damage
+	Biology::DoRadiationDamage(2, 2, UPDATE_FUNC_IN);
+	// Damage from extreme heat or cold
+	Biology::DoHeatDamage(5, 323.15, 0, UPDATE_FUNC_IN);
+	// Damage from lack of O2 or too much CO2
+	Biology::DoRespirationDamage(100, UPDATE_FUNC_IN);
+	// Heal naturally
+	Biology::DoHealing(100, UPDATE_FUNC_IN);
 	// Death check
-	if (parts[i].bio.health < 1){
-		sim->part_change_type(i, x, y, PT_DT);
-	}
-	//Metastasis code
-	if (parts[i].ctype == PT_TUMOR){
-		if (RNG::Ref().chance(1, 100)){
-		// convert biology to tumor (grow)
-			if (sim->elements[TYP(r)].Properties & TYPE_BIO && TYP(r) != PT_TUMOR){
-				int ir = ID(r);
-				sim->part_change_type(ir, parts[ir].x, parts[ir].y, PT_TUMOR);
+	Biology::HandleDeath(UPDATE_FUNC_IN);
+
+
+	int rand_x =  RNG::Ref().between(-2, 2);
+	int rand_y =  RNG::Ref().between(-2, 2);
+
+	if (BOUNDS_CHECK && (rand_x || rand_y)){ 
+
+		int pos = pmap[y + rand_y][x + rand_x];
+		int target = ID(pos);
+		int target_type = parts[target].type;
+
+		//Metastasis code
+		if (parts[i].ctype == PT_TUMOR){
+			if (RNG::Ref().chance(1, 100)){
+			// convert biology to tumor (grow)
+				if (sim->elements[target_type].Properties & TYPE_BIO && target_type != PT_TUMOR){
+					sim->part_change_type(target, x + rand_x, y + rand_y, PT_TUMOR);
+				}
 			}
 		}
 	}
@@ -156,10 +100,10 @@ static int graphics(GRAPHICS_FUNC_ARGS)
     int o = cpart->bio.o2;
 
     // C02
-    int c = cpart->bio.co2;
+    int c = cpart->bio.co2 / 3;
 
 	int q = cpart->bio.o2;
-	*colr = (int)fmax(9 * o, 75);
+	*colr = (int)fmax(3 * o, 75);
 	*colg = 0;
 	*colb = 8 * c;
 	*pixel_mode |= PMODE_BLUR;

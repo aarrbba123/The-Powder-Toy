@@ -50,20 +50,47 @@ void Element::Element_WBLD()
 
 static int update(UPDATE_FUNC_ARGS)
 {
+
+
+	// O2 use
+	Biology::UseO2(100, UPDATE_FUNC_IN);
+
 	int r, rx, ry;
+
+	int iMaxO2 = sim->elements[parts[i].type].Max_O2;
+
+	// Fight disease
+	if (Biology::AttackDisease(1, 2, 50, UPDATE_FUNC_IN)){
+		// If there was disease, multiply 
+		if (RNG::Ref().chance(1, 100)){
+			rx =  RNG::Ref().between(-2, 2);
+			ry =  RNG::Ref().between(-2, 2);
+
+			r = pmap[y+ry][x+rx];
+
+			int t = TYP(r);
+			int ir = ID(r);
+
+			if (parts[i].bio.o2 >= iMaxO2){
+				// Can replace nothing or blood
+				if (t == 0){
+					sim->create_part(ir, x, y, PT_WBLD);
+					parts[ir].bio.o2 = iMaxO2 / 2;
+					parts[i].bio.o2 = iMaxO2 / 2;
+					parts[ir].bio.health = 200;
+				}
+				else if (t == PT_BLD){
+					sim->part_change_type(ir, x, y, PT_WBLD);
+					parts[ir].bio.o2 = iMaxO2 / 2;
+					parts[i].bio.o2 = iMaxO2 / 2;
+					parts[ir].bio.health = 200;
+				}
+			}
+		}
+	}
 
     rx =  RNG::Ref().between(-4, 4);
     ry =  RNG::Ref().between(-4, 4);
-
-    // O2 use by white blood itself
-    if (RNG::Ref().chance(1, 100)){
-
-		if (parts[i].bio.o2 > 0){
-        	parts[i].bio.o2 -= 1;
-			parts[i].bio.co2 += 1;
-		}
-    }
-
     
     if (BOUNDS_CHECK && (rx || ry))
     {
@@ -76,7 +103,7 @@ static int update(UPDATE_FUNC_ARGS)
 			// Take resources from blood
 			if (t  == PT_BLD){
 				// Take oxygen
-				if (parts[ir].bio.o2 > 0 && parts[i].bio.o2 < MAX_O2 * 2){
+				if (parts[ir].bio.o2 > 0 && parts[i].bio.o2 < iMaxO2 * 2){
 					parts[i].bio.o2++;
 					parts[ir].bio.o2--;
 				}
@@ -87,63 +114,19 @@ static int update(UPDATE_FUNC_ARGS)
 				}
 				
 			}
-            // Kill foreign biological objects
-            else if (sim->elements[t].Properties & TYPE_DISEASE){
-                // Damage disease
-				parts[ir].bio.health -= 75;
-
-                // Multiply (if possible)
-                if (RNG::Ref().chance(1, 100)){
-                    rx =  RNG::Ref().between(-2, 2);
-                    ry =  RNG::Ref().between(-2, 2);
-
-                    int t = TYP(r);
-                    int ir = ID(r);
-
-                    if (parts[i].bio.o2 > MAX_O2){
-                        // Can replace nothing or blood
-                        if (t == 0){
-                            sim->create_part(ir, x, y, PT_WBLD);
-                            parts[ir].bio.o2 = MAX_O2 / 2;
-                            parts[i].bio.o2 = MAX_O2 / 2;
-                            parts[ir].bio.health = 200;
-                        }
-                        else if (t == PT_BLD){
-                            sim->part_change_type(ir, x, y, PT_WBLD);
-                            parts[ir].bio.o2 = MAX_O2 / 2;
-                            parts[i].bio.o2 = MAX_O2 / 2;
-                            parts[ir].bio.health = 200;
-                        }
-                    }
-                }
-		    }
 		}
     }
 
-	// Health management
-	if (RNG::Ref().chance(1, 100)){
-
-		// Temp check
-		if (parts[i].temp > 323.15){
-			int damage = (parts[i].temp - 315) / 5;
-			parts[i].bio.health -= damage;
-		}
-		// Damage check
-		if (parts[i].bio.co2 > MAX_CO2 || parts[i].bio.o2 < 1){
-			parts[i].bio.health--;
-		}
-		// Otherwise heal (Why make it not use O2 to heal?)
-		else{
-			if (parts[i].bio.health < 500){
-				parts[i].bio.health++;
-			}
-		}
-	}
-
+	// Radiation damage
+	Biology::DoRadiationDamage(2, 2, UPDATE_FUNC_IN);
+	// Damage from extreme heat or cold
+	Biology::DoHeatDamage(5, 323.15, 0, UPDATE_FUNC_IN);
+	// Damage from lack of O2 or too much CO2
+	Biology::DoRespirationDamage(100, UPDATE_FUNC_IN);
+	// Heal naturally
+	Biology::DoHealing(100, UPDATE_FUNC_IN);
 	// Death check
-	if (parts[i].bio.health < 1){
-		sim->part_change_type(i, x, y, PT_DT);
-	}
+	Biology::HandleDeath(UPDATE_FUNC_IN);
 
 	return 0;
 }

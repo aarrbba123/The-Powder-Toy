@@ -13,6 +13,12 @@ struct Particle;
 class Element
 {
 public:
+	// Biology additions
+	int Max_O2;
+    int Max_CO2;
+    int O2_Usage;
+    int Max_Health;
+
 	ByteString Identifier;
 	String Name;
 	pixel Colour;
@@ -59,6 +65,8 @@ public:
 
 	bool (*CtypeDraw) (CTYPEDRAW_FUNC_ARGS);
 
+	
+
 	VideoBuffer * (*IconGenerator)(int, int, int);
 
 	Particle DefaultProperties;
@@ -80,6 +88,3 @@ public:
 };
 
 #endif
-
-#define MAX_O2 30
-#define MAX_CO2 30
