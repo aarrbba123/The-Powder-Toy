@@ -2,6 +2,7 @@
 
 #include "client/Client.h"
 #include "Menu.h"
+#include "Format.h"
 
 #include "gui/game/GameModel.h"
 #include "gui/Style.h"
@@ -23,27 +24,6 @@
 
 #include <iostream>
 
-void ParseFloatProperty(String value, float &out)
-{
-	if (value.EndsWith("C"))
-	{
-		float v = value.SubstrFromEnd(1).ToNumber<float>();
-		out = v + 273.15;
-	}
-	else if(value.EndsWith("F"))
-	{
-		float v = value.SubstrFromEnd(1).ToNumber<float>();
-		out = (v-32.0f)*5/9+273.15f;
-	}
-	else
-	{
-		out = value.ToNumber<float>();
-	}
-#ifdef DEBUG
-	std::cout << "Got float value " << out << std::endl;
-#endif
-}
-
 class PropertyWindow: public ui::Window
 {
 public:
@@ -53,7 +33,7 @@ public:
 	Simulation *sim;
 	std::vector<StructProperty> properties;
 	PropertyWindow(PropertyTool *tool_, Simulation *sim);
-	void SetProperty();
+	void SetProperty(bool warn);
 	void OnDraw() override;
 	void OnKeyPress(int key, int scan, bool repeat, bool shift, bool ctrl, bool alt) override;
 	void OnTryExit(ExitMethod method) override;
@@ -81,7 +61,7 @@ sim(sim_)
 		if (textField->GetText().length())
 		{
 			CloseActiveWindow();
-			SetProperty();
+			SetProperty(true);
 			SelfDestruct();
 		}
 	} });
@@ -103,14 +83,17 @@ sim(sim_)
 	textField->SetText(Client::Ref().GetPrefString("Prop.Value", ""));
 	AddComponent(textField);
 	FocusComponent(textField);
+	SetProperty(false);
 
 	MakeActiveWindow();
 }
 
-void PropertyWindow::SetProperty()
+void PropertyWindow::SetProperty(bool warn)
 {
+	tool->validProperty = false;
 	if(property->GetOption().second!=-1 && textField->GetText().length() > 0)
 	{
+		tool->validProperty = true;
 		String value = textField->GetText().ToUpper();
 		try {
 			switch(properties[property->GetOption().second].Type)
@@ -174,7 +157,9 @@ void PropertyWindow::SetProperty()
 
 					if (properties[property->GetOption().second].Name == "type" && (v < 0 || v >= PT_NUM || !sim->elements[v].Enabled))
 					{
-						new ErrorMessage("Could not set property", "Invalid particle type");
+						tool->validProperty = false;
+						if (warn)
+							new ErrorMessage("Could not set property", "Invalid particle type");
 						return;
 					}
 
@@ -210,18 +195,25 @@ void PropertyWindow::SetProperty()
 				}
 				case StructProperty::Float:
 				{
-					ParseFloatProperty(value, tool->propValue.Float);
+					if (properties[property->GetOption().second].Name == "temp")
+						tool->propValue.Float = format::StringToTemperature(value, tool->gameModel->GetTemperatureScale());
+					else
+						tool->propValue.Float = value.ToNumber<float>();
 				}
 					break;
 				default:
-					new ErrorMessage("Could not set property", "Invalid property");
+					tool->validProperty = false;
+					if (warn)
+						new ErrorMessage("Could not set property", "Invalid property");
 					return;
 			}
 			tool->propOffset = properties[property->GetOption().second].Offset;
 			tool->propType = properties[property->GetOption().second].Type;
 			tool->changeType = properties[property->GetOption().second].Name == "type";
 		} catch (const std::exception& ex) {
-			new ErrorMessage("Could not set property", "Invalid value provided");
+			tool->validProperty = false;
+			if (warn)
+				new ErrorMessage("Could not set property", "Invalid value provided");
 			return;
 		}
 		Client::Ref().SetPref("Prop.Type", property->GetOption().second);
@@ -258,7 +250,7 @@ void PropertyTool::OpenWindow(Simulation *sim)
 
 void PropertyTool::SetProperty(Simulation *sim, ui::Point position)
 {
-	if(position.X<0 || position.X>XRES || position.Y<0 || position.Y>YRES)
+	if(position.X<0 || position.X>XRES || position.Y<0 || position.Y>YRES || !validProperty)
 		return;
 	int i = sim->pmap[position.Y][position.X];
 	if(!i)
@@ -379,5 +371,6 @@ void PropertyTool::DrawRect(Simulation *sim, Brush *cBrush, ui::Point position, 
 
 void PropertyTool::DrawFill(Simulation *sim, Brush *cBrush, ui::Point position)
 {
-	sim->flood_prop(position.X, position.Y, propOffset, propValue, propType);
+	if (validProperty)
+		sim->flood_prop(position.X, position.Y, propOffset, propValue, propType);
 }

@@ -73,7 +73,7 @@ LuaWindow::LuaWindow(lua_State * l) :
 	if (sizeY < 10)
 		sizeY = 10;
 
-	lua_pushstring(l, "Luacon_ci");
+	lua_pushliteral(l, "Luacon_ci");
 	lua_gettable(l, LUA_REGISTRYINDEX);
 	ci = (LuaScriptInterface*)lua_touserdata(l, -1);
 	lua_pop(l, 1);
@@ -136,6 +136,7 @@ int LuaWindow::addComponent(lua_State * l)
 			it->first->owner_ref = it->second;
 		}
 		window->AddComponent(luaComponent->GetComponent());
+		luaComponent->SetParentWindow(this);
 	}
 	return 0;
 }
@@ -168,6 +169,7 @@ int LuaWindow::removeComponent(lua_State * l)
 			it->second.Clear();
 			it->first->owner_ref = it->second;
 			grabbed_components.erase(it);
+			luaComponent->SetParentWindow(nullptr);
 		}
 	}
 	return 0;
@@ -230,7 +232,7 @@ void LuaWindow::triggerOnInitialized()
 		lua_rawgeti(l, LUA_REGISTRYINDEX, onInitializedFunction);
 		if(lua_pcall(l, 0, 0, 0))
 		{
-			ci->Log(CommandInterface::LogError, ByteString(lua_tostring(l, -1)).FromUtf8());
+			ci->Log(CommandInterface::LogError, tpt_lua_toString(l, -1));
 		}
 	}
 }
@@ -242,7 +244,7 @@ void LuaWindow::triggerOnExit()
 		lua_rawgeti(l, LUA_REGISTRYINDEX, onExitFunction);
 		if(lua_pcall(l, 0, 0, 0))
 		{
-			ci->Log(CommandInterface::LogError, ByteString(lua_tostring(l, -1)).FromUtf8());
+			ci->Log(CommandInterface::LogError, tpt_lua_toString(l, -1));
 		}
 	}
 }
@@ -255,7 +257,7 @@ void LuaWindow::triggerOnTick(float dt)
 		lua_pushnumber(l, dt);
 		if(lua_pcall(l, 1, 0, 0))
 		{
-			ci->Log(CommandInterface::LogError, ByteString(lua_tostring(l, -1)).FromUtf8());
+			ci->Log(CommandInterface::LogError, tpt_lua_toString(l, -1));
 		}
 	}
 }
@@ -267,7 +269,7 @@ void LuaWindow::triggerOnDraw()
 		lua_rawgeti(l, LUA_REGISTRYINDEX, onDrawFunction);
 		if(lua_pcall(l, 0, 0, 0))
 		{
-			ci->Log(CommandInterface::LogError, ByteString(lua_tostring(l, -1)).FromUtf8());
+			ci->Log(CommandInterface::LogError, tpt_lua_toString(l, -1));
 		}
 	}
 }
@@ -279,7 +281,7 @@ void LuaWindow::triggerOnFocus()
 		lua_rawgeti(l, LUA_REGISTRYINDEX, onFocusFunction);
 		if(lua_pcall(l, 0, 0, 0))
 		{
-			ci->Log(CommandInterface::LogError, ByteString(lua_tostring(l, -1)).FromUtf8());
+			ci->Log(CommandInterface::LogError, tpt_lua_toString(l, -1));
 		}
 	}
 }
@@ -291,7 +293,7 @@ void LuaWindow::triggerOnBlur()
 		lua_rawgeti(l, LUA_REGISTRYINDEX, onBlurFunction);
 		if(lua_pcall(l, 0, 0, 0))
 		{
-			ci->Log(CommandInterface::LogError, ByteString(lua_tostring(l, -1)).FromUtf8());
+			ci->Log(CommandInterface::LogError, tpt_lua_toString(l, -1));
 		}
 	}
 }
@@ -303,7 +305,7 @@ void LuaWindow::triggerOnTryExit()
 		lua_rawgeti(l, LUA_REGISTRYINDEX, onTryExitFunction);
 		if(lua_pcall(l, 0, 0, 0))
 		{
-			ci->Log(CommandInterface::LogError, ByteString(lua_tostring(l, -1)).FromUtf8());
+			ci->Log(CommandInterface::LogError, tpt_lua_toString(l, -1));
 		}
 	}
 }
@@ -315,7 +317,7 @@ void LuaWindow::triggerOnTryOkay()
 		lua_rawgeti(l, LUA_REGISTRYINDEX, onTryOkayFunction);
 		if(lua_pcall(l, 0, 0, 0))
 		{
-			ci->Log(CommandInterface::LogError, ByteString(lua_tostring(l, -1)).FromUtf8());
+			ci->Log(CommandInterface::LogError, tpt_lua_toString(l, -1));
 		}
 	}
 }
@@ -331,7 +333,7 @@ void LuaWindow::triggerOnMouseMove(int x, int y, int dx, int dy)
 		lua_pushinteger(l, dy);
 		if(lua_pcall(l, 4, 0, 0))
 		{
-			ci->Log(CommandInterface::LogError, ByteString(lua_tostring(l, -1)).FromUtf8());
+			ci->Log(CommandInterface::LogError, tpt_lua_toString(l, -1));
 		}
 	}
 }
@@ -346,7 +348,7 @@ void LuaWindow::triggerOnMouseDown(int x, int y, unsigned button)
 		lua_pushinteger(l, button);
 		if(lua_pcall(l, 3, 0, 0))
 		{
-			ci->Log(CommandInterface::LogError, ByteString(lua_tostring(l, -1)).FromUtf8());
+			ci->Log(CommandInterface::LogError, tpt_lua_toString(l, -1));
 		}
 	}
 }
@@ -361,7 +363,7 @@ void LuaWindow::triggerOnMouseUp(int x, int y, unsigned button)
 		lua_pushinteger(l, button);
 		if(lua_pcall(l, 3, 0, 0))
 		{
-			ci->Log(CommandInterface::LogError, ByteString(lua_tostring(l, -1)).FromUtf8());
+			ci->Log(CommandInterface::LogError, tpt_lua_toString(l, -1));
 		}
 	}
 }
@@ -376,7 +378,7 @@ void LuaWindow::triggerOnMouseWheel(int x, int y, int d)
 		lua_pushinteger(l, d);
 		if(lua_pcall(l, 3, 0, 0))
 		{
-			ci->Log(CommandInterface::LogError, ByteString(lua_tostring(l, -1)).FromUtf8());
+			ci->Log(CommandInterface::LogError, tpt_lua_toString(l, -1));
 		}
 	}
 }
@@ -393,7 +395,7 @@ void LuaWindow::triggerOnKeyPress(int key, int scan, bool repeat, bool shift, bo
 		lua_pushboolean(l, alt);
 		if(lua_pcall(l, 5, 0, 0))
 		{
-			ci->Log(CommandInterface::LogError, ByteString(lua_tostring(l, -1)).FromUtf8());
+			ci->Log(CommandInterface::LogError, tpt_lua_toString(l, -1));
 		}
 	}
 }
@@ -410,7 +412,7 @@ void LuaWindow::triggerOnKeyRelease(int key, int scan, bool repeat, bool shift, 
 		lua_pushboolean(l, alt);
 		if(lua_pcall(l, 5, 0, 0))
 		{
-			ci->Log(CommandInterface::LogError, ByteString(lua_tostring(l, -1)).FromUtf8());
+			ci->Log(CommandInterface::LogError, tpt_lua_toString(l, -1));
 		}
 	}
 }
@@ -485,6 +487,17 @@ int LuaWindow::onKeyRelease(lua_State * l)
 	return onKeyReleaseFunction.CheckAndAssignArg1(l);
 }
 
+void LuaWindow::ClearRef(LuaComponent *luaComponent)
+{
+	auto it = grabbed_components.find(luaComponent);
+	if (it != grabbed_components.end())
+	{
+		it->second.Clear();
+		it->first->owner_ref = it->second;
+		it->first->SetParentWindow(nullptr);
+		grabbed_components.erase(it);
+	}
+}
 
 LuaWindow::~LuaWindow()
 {
@@ -493,6 +506,7 @@ LuaWindow::~LuaWindow()
 		window->RemoveComponent(component_and_ref.first->GetComponent());
 		component_and_ref.second.Clear();
 		component_and_ref.first->owner_ref = component_and_ref.second;
+		component_and_ref.first->SetParentWindow(nullptr);
 	}
 	window->CloseActiveWindow();
 	delete window;

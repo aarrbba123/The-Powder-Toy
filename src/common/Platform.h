@@ -19,15 +19,14 @@ namespace Platform
 	void Millisleep(long int t);
 	long unsigned int GetTime();
 
-	void LoadFileInResource(int name, int type, unsigned int& size, const char*& data);
-
 	bool Stat(ByteString filename);
 	bool FileExists(ByteString filename);
 	bool DirectoryExists(ByteString directory);
 	/**
 	 * @return true on success
 	 */
-	bool DeleteFile(ByteString filename);
+	bool RemoveFile(ByteString filename);
+	bool RenameFile(ByteString filename, ByteString newFilename);
 
 	/**
 	 * @return true on success
@@ -40,6 +39,9 @@ namespace Platform
 	bool MakeDirectory(ByteString dir);
 	std::vector<ByteString> DirectorySearch(ByteString directory, ByteString search, std::vector<ByteString> extensions);
 	String DoMigration(ByteString fromDir, ByteString toDir);
+
+	bool ReadFile(std::vector<char> &fileData, ByteString filename);
+	bool WriteFile(std::vector<char> fileData, ByteString filename);
 
 #ifdef WIN
 	ByteString WinNarrow(const std::wstring &source);

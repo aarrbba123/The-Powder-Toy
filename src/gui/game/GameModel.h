@@ -4,6 +4,7 @@
 
 #include <vector>
 #include <deque>
+#include <memory>
 
 #include "gui/interface/Colour.h"
 #include "client/User.h"
@@ -21,6 +22,7 @@ class SaveFile;
 class Simulation;
 class Renderer;
 class Snapshot;
+struct SnapshotDelta;
 class GameSave;
 
 class ToolSelection
@@ -30,6 +32,14 @@ public:
 	{
 		ToolPrimary, ToolSecondary, ToolTertiary
 	};
+};
+
+struct HistoryEntry
+{
+	std::unique_ptr<Snapshot> snap;
+	std::unique_ptr<SnapshotDelta> delta;
+
+	~HistoryEntry();
 };
 
 class GameModel
@@ -64,13 +74,14 @@ private:
 	Tool * regularToolset[4];
 	User currentUser;
 	float toolStrength;
-	std::deque<Snapshot*> history;
-	Snapshot *redoHistory;
+	std::deque<HistoryEntry> history;
+	std::unique_ptr<Snapshot> historyCurrent;
 	unsigned int historyPosition;
 	unsigned int undoHistoryLimit;
 	bool mouseClickRequired;
 	bool includePressure;
 	bool perfectCircle = true;
+	int temperatureScale;
 
 	size_t activeColourPreset;
 	std::vector<ui::Colour> colourPresets;
@@ -113,6 +124,11 @@ public:
 
 	void SetEdgeMode(int edgeMode);
 	int GetEdgeMode();
+	void SetTemperatureScale(int temperatureScale);
+	inline int GetTemperatureScale() const
+	{
+		return temperatureScale;
+	}
 	void SetAmbientAirTemperature(float ambientAirTemp);
 	float GetAmbientAirTemperature();
 	void SetDecoSpace(int decoSpace);
@@ -141,12 +157,12 @@ public:
 	void BuildBrushList();
 	void BuildQuickOptionMenu(GameController * controller);
 
-	std::deque<Snapshot*> GetHistory();
-	unsigned int GetHistoryPosition();
-	void SetHistory(std::deque<Snapshot*> newHistory);
-	void SetHistoryPosition(unsigned int newHistoryPosition);
-	Snapshot * GetRedoHistory();
-	void SetRedoHistory(Snapshot * redo);
+	const Snapshot *HistoryCurrent() const;
+	bool HistoryCanRestore() const;
+	void HistoryRestore();
+	bool HistoryCanForward() const;
+	void HistoryForward();
+	void HistoryPush(std::unique_ptr<Snapshot> last);
 	unsigned int GetUndoHistoryLimit();
 	void SetUndoHistoryLimit(unsigned int undoHistoryLimit_);
 
@@ -228,7 +244,7 @@ public:
 	void AddNotification(Notification * notification);
 	void RemoveNotification(Notification * notification);
 
-	void RemoveCustomGOLType(const ByteString &identifier);
+	bool RemoveCustomGOLType(const ByteString &identifier);
 
 	ByteString SelectNextIdentifier;
 	int SelectNextTool;

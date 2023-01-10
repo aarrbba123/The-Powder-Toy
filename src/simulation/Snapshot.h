@@ -3,7 +3,9 @@
 #include <vector>
 
 #include "Particle.h"
-#include "json/json.h"
+#include "Sign.h"
+#include "Stickman.h"
+#include <json/json.h>
 
 class Snapshot
 {

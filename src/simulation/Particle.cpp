@@ -15,13 +15,23 @@ std::vector<StructProperty> const &Particle::GetProperties()
 		{ "flags"  , StructProperty::UInteger    , (intptr_t)(offsetof(Particle, flags  )) },
 		{ "tmp"    , StructProperty::Integer     , (intptr_t)(offsetof(Particle, tmp    )) },
 		{ "tmp2"   , StructProperty::Integer     , (intptr_t)(offsetof(Particle, tmp2   )) },
+		{ "tmp3"   , StructProperty::Integer     , (intptr_t)(offsetof(Particle, tmp3   )) },
+		{ "tmp4"   , StructProperty::Integer     , (intptr_t)(offsetof(Particle, tmp4   )) },
+		{ "dcolour", StructProperty::UInteger    , (intptr_t)(offsetof(Particle, dcolour)) },
 		{ "o2"    , StructProperty::Integer      , (intptr_t)(offsetof(Particle, bio.o2    )) },
 		{ "co2"   , StructProperty::Integer      , (intptr_t)(offsetof(Particle, bio.co2   )) },
 		{ "health"   , StructProperty::Integer   , (intptr_t)(offsetof(Particle, bio.health   )) },
 		{ "glucose"   , StructProperty::Integer   , (intptr_t)(offsetof(Particle, bio.glucose   )) },
-		{ "dcolour", StructProperty::UInteger    , (intptr_t)(offsetof(Particle, dcolour)) },
-		{ "pavg0"  , StructProperty::Float       , (intptr_t)(offsetof(Particle, pavg[0])) },
-		{ "pavg1"  , StructProperty::Float       , (intptr_t)(offsetof(Particle, pavg[1])) },
 	};
 	return properties;
+}
+
+std::vector<StructPropertyAlias> const &Particle::GetPropertyAliases()
+{
+	static std::vector<StructPropertyAlias> aliases = {
+		{ "pavg0" , "tmp3"    },
+		{ "pavg1" , "tmp4"    },
+		{ "dcolor", "dcolour" },
+	};
+	return aliases;
 }

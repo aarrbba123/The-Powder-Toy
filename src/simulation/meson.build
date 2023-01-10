@@ -12,6 +12,7 @@ simulation_files = files(
 	'ToolClasses.cpp',
 	'Simulation.cpp',
 	'Biology.cpp',
+	'SnapshotDelta.cpp',
 )
 
 subdir('elements')
