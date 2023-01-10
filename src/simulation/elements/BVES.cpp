@@ -466,26 +466,31 @@ int Element_BVES_graphics(GRAPHICS_FUNC_ARGS)
 		}
 		else
 		{
-			//Emulate the graphics of stored particle
-			btpart.type = t;
-			btpart.temp = cpart->temp;
-			btpart.life = cpart->tmp2;
-			btpart.tmp = int(cpart->pavg[0]);
-			btpart.ctype = int(cpart->pavg[1]);
-			if (t == PT_PHOT && btpart.ctype == 0x40000000)
-				btpart.ctype = 0x3FFFFFFF;
+			// Temp particle used for graphics.
+			Particle tpart = *cpart;
+
+			// Emulate the graphics of stored particle.
+			memset(cpart, 0, sizeof(Particle));
+			cpart->type = t;
+			cpart->temp = tpart.temp;
+			cpart->life = tpart.tmp2;
+			cpart->tmp = tpart.tmp3;
+			cpart->ctype = tpart.tmp4;
 
 			*colr = PIXR(ren->sim->elements[t].Colour);
 			*colg = PIXG(ren->sim->elements[t].Colour);
 			*colb = PIXB(ren->sim->elements[t].Colour);
 			if (ren->sim->elements[t].Graphics)
 			{
-				(*(ren->sim->elements[t].Graphics))(ren, &btpart, nx, ny, pixel_mode, cola, colr, colg, colb, firea, firer, fireg, fireb);
+				(*(ren->sim->elements[t].Graphics))(ren, cpart, nx, ny, pixel_mode, cola, colr, colg, colb, firea, firer, fireg, fireb);
 			}
 			else
 			{
-				Element::defaultGraphics(ren, &btpart, nx, ny, pixel_mode, cola, colr, colg, colb, firea, firer, fireg, fireb);
+				Element::defaultGraphics(ren, cpart, nx, ny, pixel_mode, cola, colr, colg, colb, firea, firer, fireg, fireb);
 			}
+
+			// Restore original particle data.
+			*cpart = tpart;
 		}
 		//*colr = PIXR(elements[t].pcolors);
 		//*colg = PIXG(elements[t].pcolors);
@@ -533,8 +538,8 @@ void Element_BVES_transfer_bves_to_part(Simulation * sim, Particle *bves, Partic
 	}
 	part->temp = bves->temp;
 	part->life = bves->tmp2;
-	part->tmp = int(bves->pavg[0]);
-	part->ctype = int(bves->pavg[1]);
+	part->tmp = bves->tmp3;
+	part->ctype = bves->tmp4;
     part->bio = bves->bio;
 
 	if (!(sim->elements[part->type].Properties & TYPE_ENERGY))
@@ -554,8 +559,8 @@ static void transfer_part_to_bves(Particle *part, Particle *bves)
 	bves->ctype = part->type;
 	bves->temp = part->temp;
 	bves->tmp2 = part->life;
-	bves->pavg[0] = float(part->tmp);
-	bves->pavg[1] = float(part->ctype);
+	bves->tmp3 = part->tmp;
+	bves->tmp4 = part->ctype;
     bves->bio = part->bio;
 }
 
@@ -574,8 +579,8 @@ static void transfer_bves_to_bves(Particle *src, Particle *dest, bool STOR)
 	}
 	dest->temp = src->temp;
 	dest->tmp2 = src->tmp2;
-	dest->pavg[0] = src->pavg[0];
-	dest->pavg[1] = src->pavg[1];
+	dest->tmp3 = src->tmp3;
+	dest->tmp4 = src->tmp4;
     dest->bio = src->bio;
 }
 
