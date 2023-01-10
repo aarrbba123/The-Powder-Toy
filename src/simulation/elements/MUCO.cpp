@@ -3,11 +3,11 @@
 static int update(UPDATE_FUNC_ARGS);
 static int graphics(GRAPHICS_FUNC_ARGS);
 
-void Element::Element_MEAT()
+void Element::Element_MUCO()
 {
-	Identifier = "DEFAULT_PT_MEAT";
-	Name = "MEAT";
-	Colour = PIXPACK(0x990022);
+	Identifier = "DEFAULT_PT_MUCO";
+	Name = "MUCO";
+	Colour = PIXPACK(0x666611);
 	MenuVisible = 1;
 	MenuSection = SC_BIO;
 	Enabled = 1;
@@ -33,7 +33,7 @@ void Element::Element_MEAT()
 	DefaultProperties.temp = R_TEMP - 2.0f + 273.15f;
 	DefaultProperties.bio.maxHealth = 100;
 	HeatConduct = 29;
-	Description = "Meat. Basic biological material.";
+	Description = "Mucuous membrane. Protects against stomach acid (and bacteria!)";
 
 	Properties = TYPE_SOLID|PROP_NEUTPENETRATE|TYPE_BIO;
 
@@ -53,7 +53,7 @@ void Element::Element_MEAT()
 
 	Max_O2 = 100;
 	Max_CO2 = 100;
-	Max_Health = 100;
+	Max_Health = 400;
 
 	DefaultProperties.bio.o2 = Max_O2;
 	DefaultProperties.bio.co2 = 0;
@@ -72,6 +72,8 @@ static int update(UPDATE_FUNC_ARGS)
 	Biology::DoHeatDamage(5, 323.15, 273, UPDATE_FUNC_IN);
 	// Damage from lack of O2 or too much CO2
 	Biology::DoRespirationDamage(100, UPDATE_FUNC_IN);
+    // Hurt diseases
+    Biology::AttackDisease(5, 1, 10, UPDATE_FUNC_IN);
 	// Heal naturally
 	Biology::DoHealing(100, UPDATE_FUNC_IN);
 	// Death check
@@ -83,21 +85,12 @@ static int update(UPDATE_FUNC_ARGS)
 
 static int graphics(GRAPHICS_FUNC_ARGS)
 {
-    // Oxygen
-    int o = cpart->bio.o2;
-
-    // C02
-    int c = cpart->bio.co2;
-
-	*colr = (int)fmin(200, fmax(3 * o, 100));
-	*colg = 0;
-	*colb = (int)fmin(200, fmax(1 * o, 30));
 	*pixel_mode |= PMODE_BLUR;
 
 	// Life mix
-	*colr = int(*colr * (cpart->bio.health) / 140.0f);
-	*colg = int(*colg * (cpart->bio.health) / 140.0f);
-	*colb = int(*colb * (cpart->bio.health) / 160.0f);
+	*colr *= (int)fmax((cpart->bio.health) / 200.0f, 1);
+	*colg *= (int)fmax((cpart->bio.health) / 200.0f, 1);
+	*colb *= (int)fmax((cpart->bio.health) / 200.0f, 1);
 
 	return 0;
 }

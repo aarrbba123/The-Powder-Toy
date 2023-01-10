@@ -211,6 +211,14 @@ simulation_elem_ids = [
 	[ 'WACKY',   209 ],
 	[ 'BACT',   210 ],
 	[ 'WBLD',   211 ],
+	[ 'GLUC',   212 ],
+	[ 'DIGE',   213 ],
+	[ 'SACID',   214 ],
+	[ 'STOM',   215 ],
+	[ 'MUCO',   216 ],
+	[ 'SVLV',   217 ],
+	[ 'POOP',   218 ],
+	[ 'INTE',   219 ],
 ]
 
 simulation_elem_src = []

@@ -2149,7 +2149,8 @@ void GameView::OnDraw()
 				}
 				else if (c->IsBio(type))
 				{
-					sampleInfo << c->ElementResolve(type, 0) << ", O2: " << sample.particle.bio.o2 << ", CO2: " << sample.particle.bio.co2 << ", Health: " << sample.particle.bio.health;
+					sampleInfo << c->ElementResolve(type, 0) << ", O2: " << sample.particle.bio.o2 << ", CO2: ";
+					sampleInfo << sample.particle.bio.co2 << ", G: " << sample.particle.bio.glucose << ", Health: " << sample.particle.bio.health;
 					// I give up trying to fix this
 					// sampleInfo << "\n" << c->BasicParticleInfo(sample.particle); //If this doesn't work, I'm going to give up and just have it not display the stuff below.
 					// sampleInfo << "Max Health: " << sample.particle.bio.maxHealth << ", Radiation Damage: " << sample.particle.bio.radDamage;

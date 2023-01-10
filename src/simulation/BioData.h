@@ -7,4 +7,5 @@ struct BioData
     int health;
     int radDamage;
     int maxHealth;
+    int glucose;
 };

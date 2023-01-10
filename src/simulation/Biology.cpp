@@ -10,7 +10,11 @@ Biology::Biology()
 void Biology::UseO2(int chance, UPDATE_FUNC_ARGS){
 	if (!CHANCE(chance)) return;
 
-	if (parts[i].bio.o2 > 0){
+	if (parts[i].bio.o2 > 0 && parts[i].bio.glucose > 0){
+
+		// Respiration requires glucose
+		parts[i].bio.glucose -= 1;
+
 		parts[i].bio.o2 -= 1;
 		parts[i].bio.co2 += 1;
 	}
@@ -39,6 +43,8 @@ void Biology::AttackBio(int chance, int range, int damage, UPDATE_FUNC_ARGS){
 	// Don't harm own type
 	if (this_type == target_type || target_type == 0) return;
 
+	// Epidermis and mucous repels attack
+	if (target_type == PT_SKINE || target_type == PT_MUCO) return;
 
 
 	if (!target) return;
@@ -53,6 +59,14 @@ void Biology::AttackBio(int chance, int range, int damage, UPDATE_FUNC_ARGS){
 
 		parts[i].bio.o2 += damage;
 		parts[target].bio.o2 -= damage;
+	}
+
+	// Take glucose
+	if (parts[target].bio.glucose > 0)
+	{
+
+		parts[i].bio.glucose += damage;
+		parts[target].bio.glucose -= damage;
 	}
 
 	// Give CO2
@@ -84,7 +98,7 @@ void Biology::DoRespirationDamage(int chance, UPDATE_FUNC_ARGS){
 	Element this_element = sim->elements[this_type];
 
 	// Damage check
-	if (parts[i].bio.co2 > this_element.Max_CO2 || parts[i].bio.o2 < 1){
+	if (parts[i].bio.co2 > this_element.Max_CO2 || parts[i].bio.o2 < 1 || parts[i].bio.glucose < 1){
 		parts[i].bio.health--;
 	}
 }
@@ -119,6 +133,8 @@ void Biology::GrowInRange(int chance, int range, int grow_on, UPDATE_FUNC_ARGS){
 
 	// Require over half of all resources
 	if (!(parts[i].bio.o2 > (this_element.Max_O2 / 2))) return;
+	// Require over 50 glucose
+	if (!(parts[i].bio.glucose > 50)) return;
 
 	int rand_x, rand_y;
 
@@ -131,21 +147,23 @@ void Biology::GrowInRange(int chance, int range, int grow_on, UPDATE_FUNC_ARGS){
 	int target = ID(pos);
 	int target_type  = parts[target].type;
 
-	Element target_element = sim->elements[target_type];
-	
 	// Grow into empty
-	if (grow_on == 0 && target_type == 0){
-		
+	if (grow_on == PT_NONE && (!pos)){
+		sim->create_part(-1, x + rand_x, y + rand_y, this_type);
 		parts[target].bio.o2 = parts[i].bio.o2 / 2;
 		parts[i].bio.o2 /= 2;
+		parts[target].bio.glucose = parts[i].bio.glucose / 2;
+		parts[i].bio.glucose /= 2;
 		parts[target].bio.health = this_element.Max_Health;
 		parts[target].bio.co2 = 0;
 	}
 	// Grow onto other elements
 	else if (grow_on == target_type){
-		sim->part_change_type(target, x, y, this_type);
+		sim->part_change_type(target, x + rand_x, y + rand_y, this_type);
 		parts[target].bio.o2 = parts[i].bio.o2 / 2;
 		parts[i].bio.o2 /= 2;
+		parts[target].bio.glucose = parts[i].bio.glucose / 2;
+		parts[i].bio.glucose /= 2;
 		parts[target].bio.health = this_element.Max_Health;
 		parts[target].bio.co2 = 0;
 	}
@@ -174,19 +192,26 @@ void Biology::DiffuseResources(int chance, int range, UPDATE_FUNC_ARGS){
 	if (sim->elements[target_type].Properties & TYPE_BIO && // Must be bio
 		!(sim->elements[target_type].Properties & TYPE_DISEASE)) // Must not be disease) 
 	{
-		if (target_type == PT_BLD){ // Must not be blood (unless this is blood)
-			if (parts[i].type != PT_BLD){
-				return;
+
+		// Only blood should give O2 to blood - tissue should not hand it back
+		if (parts[i].type == PT_BLD || target_type != PT_BLD ){
+			if (parts[i].bio.o2 > parts[target].bio.o2){
+
+				int amount = (parts[i].bio.o2 - parts[target].bio.o2) / 2;
+
+				parts[i].bio.o2 -= amount;
+				parts[target].bio.o2 += amount;
 			}
 		}
 
-		if (parts[i].bio.o2 > parts[target].bio.o2){
+		if (parts[i].bio.glucose > parts[target].bio.glucose){
 
-			int amount = (parts[i].bio.o2 - parts[target].bio.o2) / 2;
+			int amount = (parts[i].bio.glucose - parts[target].bio.glucose) / 2;
 
-			parts[i].bio.o2 -= amount;
-			parts[target].bio.o2 += amount;
+			parts[i].bio.glucose -= amount;
+			parts[target].bio.glucose += amount;
 		}
+
 		if (parts[i].bio.co2 > parts[target].bio.co2){
 
 			int amount = (parts[i].bio.co2 - parts[target].bio.co2) / 2;
@@ -273,6 +298,10 @@ void Biology::StealResources(int chance, int range, UPDATE_FUNC_ARGS){
 		if (parts[target].bio.o2 > 1){
 			parts[i].bio.o2++;
 			parts[target].bio.o2--;
+		}
+		if (parts[target].bio.glucose > 1){
+			parts[i].bio.glucose++;
+			parts[target].bio.glucose--;
 		}
 		if (parts[i].bio.co2 > 0){
 			parts[i].bio.co2--;

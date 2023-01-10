@@ -3,11 +3,11 @@
 static int update(UPDATE_FUNC_ARGS);
 static int graphics(GRAPHICS_FUNC_ARGS);
 
-void Element::Element_MEAT()
+void Element::Element_INTE()
 {
-	Identifier = "DEFAULT_PT_MEAT";
-	Name = "MEAT";
-	Colour = PIXPACK(0x990022);
+	Identifier = "DEFAULT_PT_INTE";
+	Name = "INTE";
+	Colour = PIXPACK(0x890065);
 	MenuVisible = 1;
 	MenuSection = SC_BIO;
 	Enabled = 1;
@@ -25,7 +25,7 @@ void Element::Element_MEAT()
 	Flammable = 0;
 	Explosive = 0;
 	Meltable = 0;
-	Hardness = 12;
+	Hardness = 8;
 
 	Weight = 150;
 
@@ -33,7 +33,7 @@ void Element::Element_MEAT()
 	DefaultProperties.temp = R_TEMP - 2.0f + 273.15f;
 	DefaultProperties.bio.maxHealth = 100;
 	HeatConduct = 29;
-	Description = "Meat. Basic biological material.";
+	Description = "Intestine. Turns DIGE (digested material) into POOP and gains glucose from the process.";
 
 	Properties = TYPE_SOLID|PROP_NEUTPENETRATE|TYPE_BIO;
 
@@ -53,7 +53,7 @@ void Element::Element_MEAT()
 
 	Max_O2 = 100;
 	Max_CO2 = 100;
-	Max_Health = 100;
+	Max_Health = 200;
 
 	DefaultProperties.bio.o2 = Max_O2;
 	DefaultProperties.bio.co2 = 0;
@@ -77,6 +77,28 @@ static int update(UPDATE_FUNC_ARGS)
 	// Death check
 	Biology::HandleDeath(UPDATE_FUNC_IN);
 
+    if (parts[i].bio.o2 > 5 && parts[i].bio.health > 75) {
+
+        // Needs to be somewhat healthy to absorb nutrients
+        if (RNG::Ref().chance(1, 100)){
+            int rand_x =  RNG::Ref().between(-1, 1);
+            int rand_y =  RNG::Ref().between(-1, 1);
+
+            if (BOUNDS_CHECK && (rand_x || rand_y)){ 
+
+                int pos = pmap[y + rand_y][x + rand_x];
+                int t = TYP(pos);
+
+                if (t == PT_DIGE) {
+                    sim->part_change_type(ID(pos), x + rand_x, y + rand_y, PT_POOP);
+                    parts[i].bio.glucose += 500;
+                }
+            }
+            // SQUEEZE
+            sim->pv[y/CELL][x/CELL] = RNG::Ref().between(-5, 5);
+        }
+    }
+
 	return 0;
 }
 
@@ -89,15 +111,15 @@ static int graphics(GRAPHICS_FUNC_ARGS)
     // C02
     int c = cpart->bio.co2;
 
-	*colr = (int)fmin(200, fmax(3 * o, 100));
+	*colr = (int)fmin(150, fmax(3 * o, 100));
 	*colg = 0;
-	*colb = (int)fmin(200, fmax(1 * o, 30));
+	*colb = (int)fmin(100, fmax(1.5 * o, 30));
 	*pixel_mode |= PMODE_BLUR;
 
 	// Life mix
-	*colr = int(*colr * (cpart->bio.health) / 140.0f);
+	*colr = int(*colr * (cpart->bio.health) / 160.0f);
 	*colg = int(*colg * (cpart->bio.health) / 140.0f);
-	*colb = int(*colb * (cpart->bio.health) / 160.0f);
+	*colb = int(*colb * (cpart->bio.health) / 120.0f);
 
 	return 0;
 }

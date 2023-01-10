@@ -53,6 +53,7 @@ void Element::Element_BACT()
 	Max_Health = 200;
 
 	DefaultProperties.bio.o2 = Max_O2;
+	DefaultProperties.bio.glucose = 200;
 	DefaultProperties.bio.co2 = 0;
 	DefaultProperties.bio.health = Max_Health;
 
@@ -63,9 +64,9 @@ static int update(UPDATE_FUNC_ARGS)
     // O2 use itself
     Biology::UseO2(300, UPDATE_FUNC_IN);
 	// Bacteria attack all other biological components
-	Biology::AttackBio(5, 2, 5, UPDATE_FUNC_IN);
+	Biology::AttackBio(5, 2, 20, UPDATE_FUNC_IN);
 	// Damage from extreme heat or cold
-	Biology::DoHeatDamage(5, 323.15, 0, UPDATE_FUNC_IN);
+	Biology::DoHeatDamage(5, 323.15, 273, UPDATE_FUNC_IN);
 	// Damage from lack of O2 or too much CO2
 	Biology::DoRespirationDamage(100, UPDATE_FUNC_IN);
 	// Radiation damage
@@ -73,9 +74,9 @@ static int update(UPDATE_FUNC_ARGS)
 	// Heal naturally
 	Biology::DoHealing(100, UPDATE_FUNC_IN);
 	// Grow into air
-	Biology::GrowInRange(200, 2, PT_NONE, UPDATE_FUNC_IN);
+	Biology::GrowInRange(100, 5, PT_NONE, UPDATE_FUNC_IN);
 	// Grow onto dead tissue
-	Biology::GrowInRange(200, 2, PT_DT, UPDATE_FUNC_IN);
+	Biology::GrowInRange(100, 5, PT_DT, UPDATE_FUNC_IN);
 	// Death check
 	Biology::HandleDeath(UPDATE_FUNC_IN);
 

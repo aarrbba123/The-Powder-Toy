@@ -29,7 +29,7 @@ void Element::Element_SKINE()
 
 	Weight = 100;
 
-	HeatConduct = 2;
+	HeatConduct = 1;
 	Description = "The Epidermis. The outermost layer of skin.";
 
 	Properties = TYPE_SOLID|TYPE_BIO;
@@ -69,7 +69,7 @@ static int update(UPDATE_FUNC_ARGS)
 	Biology::DoRadiationDamage(2, 2, UPDATE_FUNC_IN);
 	// Damage from extreme heat or cold
 	// Skin is a bit more resilient against temperature
-	Biology::DoHeatDamage(20, 323.15, 0, UPDATE_FUNC_IN);
+	Biology::DoHeatDamage(20, 323.15, 273, UPDATE_FUNC_IN);
 	// Damage from lack of O2 or too much CO2
 	Biology::DoRespirationDamage(100, UPDATE_FUNC_IN);
 	// Heal naturally

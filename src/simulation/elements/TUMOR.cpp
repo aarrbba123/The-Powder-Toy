@@ -97,7 +97,7 @@ static int update(UPDATE_FUNC_ARGS)
 	}
 
 	// Health related things
-	Biology::DoHeatDamage(50, 323.15, 0, UPDATE_FUNC_IN);
+	Biology::DoHeatDamage(50, 323.15, 273, UPDATE_FUNC_IN);
 	Biology::DoRespirationDamage(50, UPDATE_FUNC_IN);
 	Biology::DoHealing(50, UPDATE_FUNC_IN);
 	Biology::HandleDeath(UPDATE_FUNC_IN);

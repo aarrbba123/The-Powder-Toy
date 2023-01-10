@@ -57,12 +57,16 @@ static int update(UPDATE_FUNC_ARGS)
 	if (Biology::TryCollect(2, 1, PT_O2, UPDATE_FUNC_IN)){
 		parts[i].bio.o2 += 5;
 	}
+	// Try to collect glucose
+	if (Biology::TryCollect(2, 1, PT_GLUC, UPDATE_FUNC_IN)){
+		parts[i].bio.glucose += 1000;
+	}
 	// Diffuse resources
 	Biology::DiffuseResources(1, 2, UPDATE_FUNC_IN);
 	// Radiation damage
 	Biology::DoRadiationDamage(2, 2, UPDATE_FUNC_IN);
 	// Damage from extreme heat or cold
-	Biology::DoHeatDamage(5, 323.15, 0, UPDATE_FUNC_IN);
+	Biology::DoHeatDamage(5, 323.15, 273, UPDATE_FUNC_IN);
 	// Damage from lack of O2 or too much CO2
 	Biology::DoRespirationDamage(100, UPDATE_FUNC_IN);
 	// Heal naturally

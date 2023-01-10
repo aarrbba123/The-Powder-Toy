@@ -73,7 +73,7 @@ static int update(UPDATE_FUNC_ARGS)
     // Radiation damage
 	Biology::DoRadiationDamage(2, 2, UPDATE_FUNC_IN);
 	// Damage from extreme heat or cold
-	Biology::DoHeatDamage(5, 323.15, 0, UPDATE_FUNC_IN);
+	Biology::DoHeatDamage(5, 323.15, 273, UPDATE_FUNC_IN);
 	// Damage from lack of O2 or too much CO2
 	Biology::DoRespirationDamage(50, UPDATE_FUNC_IN);
 	// Heal naturally
