@@ -46,6 +46,10 @@ void Element::Element_BLD()
 
 	Update = &update;
 	Graphics = &graphics;
+	
+	Max_O2 = 200;
+	Max_CO2 = 100;
+	Max_Health = 500;
 }
 
 static int update(UPDATE_FUNC_ARGS)
