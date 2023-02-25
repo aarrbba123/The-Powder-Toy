@@ -55,7 +55,7 @@ void Element::Element_BACT()
 	DefaultProperties.bio.o2 = Max_O2;
 	DefaultProperties.bio.glucose = 200;
 	DefaultProperties.bio.co2 = 0;
-	DefaultProperties.bio.health = Max_Health;
+	DefaultProperties.bio.health = 200;
 
 }
 

@@ -35,7 +35,7 @@
 #define PROP_NOCTYPEDRAW	0x100000 // 2^20 When this element is drawn upon with, do not set ctype (like BCLN for CLNE)
 #define TYPE_BIO            0x200000 // 2^21 Flag for biological materials
 #define TYPE_DISEASE        0x400000 // 2^22 Flag for immune-targeted materials
-#define TYPE_FOOD           0x200000 // 2^23 Flag for digestable materials
+#define TYPE_FOOD           0x800000 // 2^23 Flag for digestable materials
 
 #define FLAG_STAGNANT	0x1
 #define FLAG_SKIPMOVE  0x2 // skip movement for one frame, only implemented for PHOT

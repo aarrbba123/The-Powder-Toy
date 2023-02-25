@@ -50,9 +50,10 @@ void Element::Element_TUMOR()
 	// Bio stuff
 	Max_O2 = 100;
 	Max_CO2 =  100;
+	Max_Health = 250; //Why limit tumors to only 250 health?
 
 	DefaultProperties.bio.health = 250; // In real life, cancer survives better than regular tissue (citation: HeLa)
-	DefaultProperties.bio.o2 = Max_O2;
+	DefaultProperties.bio.o2 = 100;
 	DefaultProperties.bio.co2 = 0;
 }
 

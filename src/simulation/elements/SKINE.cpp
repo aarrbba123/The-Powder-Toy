@@ -42,9 +42,9 @@ void Element::Element_SKINE()
 	// Outer skin is pretty tough
 	Max_Health = 200;
 
-	DefaultProperties.bio.o2 = Max_O2;
+	DefaultProperties.bio.o2 = 100;
 	DefaultProperties.bio.co2 = 0;
-	DefaultProperties.bio.health = Max_Health;
+	DefaultProperties.bio.health = 200;
 
 	LowPressure = IPL;
 	LowPressureTransition = NT;

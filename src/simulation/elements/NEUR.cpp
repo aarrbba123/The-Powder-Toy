@@ -32,18 +32,6 @@ void Element::Element_NEUR()
 	HeatConduct = 10;
 	Description = "Neurons. Randomly emit electrical pulses when alive, relative to their health.";
 
-    // Bio stuff
-
-	Max_O2 = 100;
-	Max_CO2 = 100;
-
-	// Neurons are weak
-	Max_Health = 50;
-
-	DefaultProperties.bio.o2 = Max_O2;
-	DefaultProperties.bio.co2 = 0;
-	DefaultProperties.bio.health = Max_Health;
-
 	Properties = TYPE_SOLID|TYPE_BIO;
 
 	LowPressure = IPL;
@@ -57,6 +45,18 @@ void Element::Element_NEUR()
 
 	Update = &update;
     Graphics = &graphics;
+
+	// Bio stuff
+
+	Max_O2 = 100;
+	Max_CO2 = 100;
+
+	// Neurons are weak
+	Max_Health = 50;
+
+	DefaultProperties.bio.o2 = 100;
+	DefaultProperties.bio.co2 = 0;
+	DefaultProperties.bio.health = 50;
 }
 
 static int update(UPDATE_FUNC_ARGS)

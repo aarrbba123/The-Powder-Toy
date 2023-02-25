@@ -39,9 +39,9 @@ void Element::Element_SKINS()
 	
 	Max_Health = 100;
 
-	DefaultProperties.bio.o2 = Max_O2;
+	DefaultProperties.bio.o2 = 100;
 	DefaultProperties.bio.co2 = 0;
-	DefaultProperties.bio.health = Max_Health;
+	DefaultProperties.bio.health = 100;
 
 	Properties = TYPE_SOLID|TYPE_BIO;
 

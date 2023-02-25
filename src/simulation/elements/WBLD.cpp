@@ -28,7 +28,6 @@ void Element::Element_WBLD()
 	Hardness = 20;
 
 	Weight = 10;
-	DefaultProperties.bio.health = 200;
 	DefaultProperties.temp = R_TEMP - 2.0f + 273.15f;
 	HeatConduct = 29;
 	Description = "White blood cells. Fight infection, but use a lot of resources. Multiply if infection is detected.";
@@ -46,6 +45,16 @@ void Element::Element_WBLD()
 
 	Update = &update;
 	Graphics = &graphics;
+
+	//Bio stuff
+
+	Max_Health = 200;
+	Max_O2 = 100;
+	Max_CO2 = 100;
+
+	DefaultProperties.bio.health = 200;
+	DefaultProperties.bio.o2 = 100;
+	DefaultProperties.bio.co2 = 0;
 }
 
 static int update(UPDATE_FUNC_ARGS)
