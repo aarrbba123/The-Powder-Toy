@@ -46,6 +46,16 @@ void Element::Element_BLD()
 
 	Update = &update;
 	Graphics = &graphics;
+
+	// Bio stuff
+
+	Max_O2 = 200;
+	Max_CO2 = 200;
+	Max_Health = 500;
+
+	DefaultProperties.bio.o2 = Max_O2;
+	DefaultProperties.bio.co2 = 0;
+	DefaultProperties.bio.health = Max_Health;
 }
 
 static int update(UPDATE_FUNC_ARGS)

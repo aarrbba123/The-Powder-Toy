@@ -92,16 +92,20 @@ static int update(UPDATE_FUNC_ARGS)
 			}
 			// Blood interactions
 			else if (TYP(r) == PT_BLD || parts[ir].ctype == PT_BLD){
-				// Give oxygen
-				if (parts[i].bio.o2 > 0 && parts[i].bio.o2 > parts[ir].bio.o2){
-					parts[ir].bio.o2 += 5;
-					parts[i].bio.o2 -= 5;
+				int otherMaxO2 = sim->elements[parts[ir].type].Max_O2;
+				// Give oxygen (Unless BLD is full)
+				if (parts[i].bio.o2 > 0 && parts[i].bio.o2 > parts[ir].bio.o2 && parts[ir].bio.o2 < otherMaxO2){
+					// "Cap no fact"
+					int amount = (int)fmin(otherMaxO2 - parts[ir].bio.o2, 5);
+					parts[ir].bio.o2 += amount;
+					parts[i].bio.o2 -= amount;
 				}
 
 				// Take CO2
 				if (parts[ir].bio.co2 > 0){
-					parts[i].bio.co2 += 5;
-					parts[ir].bio.co2 -= 5;
+					int amount = (int)fmin(parts[ir].bio.co2, 5);
+					parts[i].bio.co2 += amount;
+					parts[ir].bio.co2 -= amount;
 				}
 			}
 		}
