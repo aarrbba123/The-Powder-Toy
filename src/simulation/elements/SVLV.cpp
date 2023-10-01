@@ -28,8 +28,10 @@ void Element::Element_SVLV()
 	Hardness = 8;
 
 	Weight = 150;
-	
+
+	DefaultProperties.bio.health = 100;
 	DefaultProperties.temp = R_TEMP - 2.0f + 273.15f;
+	DefaultProperties.bio.maxHealth = 100;
 	HeatConduct = 29;
 	Description = "Stomach valve. Transports DIGE (digested material) from above itself to below itself.";
 
@@ -53,9 +55,9 @@ void Element::Element_SVLV()
 	Max_CO2 = 100;
 	Max_Health = 200;
 
-	DefaultProperties.bio.o2 = 100;
+	DefaultProperties.bio.o2 = Max_O2;
 	DefaultProperties.bio.co2 = 0;
-	DefaultProperties.bio.health = 200;
+	DefaultProperties.bio.health = Max_Health;
 }
 
 static int update(UPDATE_FUNC_ARGS)

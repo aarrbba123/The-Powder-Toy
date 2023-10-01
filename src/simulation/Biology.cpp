@@ -195,16 +195,9 @@ void Biology::DiffuseResources(int chance, int range, UPDATE_FUNC_ARGS){
 
 		// Only blood should give O2 to blood - tissue should not hand it back
 		if (parts[i].type == PT_BLD || target_type != PT_BLD ){
-			// bio should not give o2 to another bio who has it's o2 level at max
-			if (parts[i].bio.o2 > parts[target].bio.o2 && !(target_element.Max_O2 <= parts[target].bio.o2)){
+			if (parts[i].bio.o2 > parts[target].bio.o2){
 
 				int amount = (parts[i].bio.o2 - parts[target].bio.o2) / 2;
-
-				//if the target's amount is close to maximum, and the amount being added will exceed the maximum, cap the amount of o2 so it will be = to target's max_o2 when added.
-				//Im sure there is a much faster way to do this but for now, here it is.
-				if (parts[target].bio.o2 + amount > target_element.Max_O2) {
-					amount -= (amount - (target_element.Max_O2 - parts[target].bio.o2));
-				}
 
 				parts[i].bio.o2 -= amount;
 				parts[target].bio.o2 += amount;

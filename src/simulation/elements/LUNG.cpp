@@ -53,9 +53,9 @@ void Element::Element_LUNG()
 	Max_CO2 = 500;
 	Max_Health = 150;
 
-	DefaultProperties.bio.o2 = 500;
+	DefaultProperties.bio.o2 = Max_O2;
 	DefaultProperties.bio.co2 = 0;
-	DefaultProperties.bio.health = 150;
+	DefaultProperties.bio.health = Max_Health;
 }
 
 static int update(UPDATE_FUNC_ARGS)

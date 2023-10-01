@@ -28,6 +28,7 @@ void Element::Element_BLD()
 	Hardness = 20;
 
 	Weight = 10;
+	DefaultProperties.bio.health = 500;
 	DefaultProperties.temp = R_TEMP - 2.0f + 273.15f;
 	HeatConduct = 29;
 	Description = "Blood. Absorbs oxygen and transfers it to other living pixels.";
@@ -45,15 +46,6 @@ void Element::Element_BLD()
 
 	Update = &update;
 	Graphics = &graphics;
-
-	//Bio Stuff (Buffing MEAT = buffing BLD)
-	Max_CO2 = 275;
-	Max_O2 = 300;
-	Max_Health = 500;
-
-	DefaultProperties.bio.health = 500;
-	DefaultProperties.bio.o2 = 300;
-	DefaultProperties.bio.co2 = 0;
 }
 
 static int update(UPDATE_FUNC_ARGS)
