@@ -100,8 +100,8 @@ static int update(UPDATE_FUNC_ARGS)
 
 				// Take CO2
 				if (parts[ir].bio.co2 > 0){
-					parts[i].bio.co2 += 5;
-					parts[ir].bio.co2 -= 5;
+					parts[i].bio.co2 += parts[ir].bio.co2;
+					parts[ir].bio.co2 = 0;
 				}
 			}
 		}

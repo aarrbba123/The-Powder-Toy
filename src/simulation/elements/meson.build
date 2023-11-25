@@ -219,6 +219,8 @@ simulation_elem_ids = [
 	[ 'SVLV',   217 ],
 	[ 'POOP',   218 ],
 	[ 'INTE',   219 ],
+	[ 'PLAT',   220 ],
+	[ 'SCAR',   221 ],
 ]
 
 simulation_elem_src = []
