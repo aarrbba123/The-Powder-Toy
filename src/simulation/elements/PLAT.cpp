@@ -49,7 +49,7 @@ void Element::Element_PLAT()
 
 static int update(UPDATE_FUNC_ARGS)
 {
-    if (!CHANCE(10)) return;
+    if (!RNG::Ref().chance(1, 5)) return 0;
 
 	int r, rx, ry;
 
