@@ -50,8 +50,8 @@ void Element::Element_PLAT()
 static int update(UPDATE_FUNC_ARGS)
 {
 
-	int rand_x =  RNG::Ref().between(-1, 1);
-	int rand_y =  RNG::Ref().between(-1, 1);
+	int rand_x =  RNG::Ref().between(-2, 2);
+	int rand_y =  RNG::Ref().between(-2, 2);
 
 	if (BOUNDS_CHECK && (rand_x || rand_y)){ 
 
@@ -59,7 +59,6 @@ static int update(UPDATE_FUNC_ARGS)
 		int target = ID(pos);
 		int target_type = parts[target].type;
 
-		//Metastasis code
 		if (target_type == PT_SKINS ||
             target_type == PT_SKIND ||
             target_type == PT_SKINE) {
