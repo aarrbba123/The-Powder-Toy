@@ -49,15 +49,17 @@ void Element::Element_PLAT()
 
 static int update(UPDATE_FUNC_ARGS)
 {
+    if (!CHANCE(10)) return;
 
-	int rand_x =  RNG::Ref().between(-1, 1);
-	int rand_y =  RNG::Ref().between(-1, 1);
+	int r, rx, ry;
 
-	if (BOUNDS_CHECK && (rand_x || rand_y)){ 
+    rx =  RNG::Ref().between(-2, 2);
+    ry =  RNG::Ref().between(-2, 2);
 
-		int pos = pmap[y + rand_y][x + rand_x];
-		int target = ID(pos);
-		int target_type = parts[target].type;
+    if (BOUNDS_CHECK && (rx || ry))
+    {
+        r = pmap[y+ry][x+rx];
+        int target_type = TYP(r);
 
 		if (target_type == PT_SKINS ||
             target_type == PT_SKIND ||
