@@ -3,7 +3,7 @@
 static int update(UPDATE_FUNC_ARGS);
 static int graphics(GRAPHICS_FUNC_ARGS);
 
-void Element::Element_BLD()
+void Element::Element_PLAT()
 {
 	Identifier = "DEFAULT_PT_PLAT";
 	Name = "PLAT";
@@ -60,14 +60,12 @@ static int update(UPDATE_FUNC_ARGS)
 		int target = ID(pos);
 		int target_type = parts[target].type;
 
-        int self = ID(pmap[])
-
 		//Metastasis code
 		if (parts[i].ctype == PT_SKINS ||
             parts[i].ctype == PT_SKIND ||
             parts[i].ctype == PT_SKINE) {
 
-			sim->part_change_type(i, x, y, PT_SCAB);
+			sim->part_change_type(i, x, y, PT_SCAR);
 		}
 	}
 
