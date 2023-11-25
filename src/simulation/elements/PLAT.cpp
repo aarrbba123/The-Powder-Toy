@@ -50,20 +50,16 @@ void Element::Element_PLAT()
 static int update(UPDATE_FUNC_ARGS)
 {
 
-	int rand_x =  RNG::Ref().between(-2, 2);
-	int rand_y =  RNG::Ref().between(-2, 2);
+	int rand_x =  RNG::Ref().between(-1, 1);
+	int rand_y =  RNG::Ref().between(-1, 1);
 
 	if (BOUNDS_CHECK && (rand_x || rand_y)){ 
 
-		int pos = pmap[y + rand_y][x + rand_x];
+		int type = parts[i].type;
 
-		int target = ID(pos);
-		int target_type = parts[target].type;
-
-		//Metastasis code
-		if (parts[i].ctype == PT_SKINS ||
-            parts[i].ctype == PT_SKIND ||
-            parts[i].ctype == PT_SKINE) {
+		if (type == PT_SKINS ||
+            type == PT_SKIND ||
+            type == PT_SKINE) {
 
 			sim->part_change_type(i, x, y, PT_SCAR);
 		}
