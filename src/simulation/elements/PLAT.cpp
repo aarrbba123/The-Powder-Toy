@@ -55,11 +55,14 @@ static int update(UPDATE_FUNC_ARGS)
 
 	if (BOUNDS_CHECK && (rand_x || rand_y)){ 
 
-		int type = parts[i].type;
+		int pos = pmap[y + rand_y][x + rand_x];
+		int target = ID(pos);
+		int target_type = parts[target].type;
 
-		if (type == PT_SKINS ||
-            type == PT_SKIND ||
-            type == PT_SKINE) {
+		//Metastasis code
+		if (target_type == PT_SKINS ||
+            target_type == PT_SKIND ||
+            target_type == PT_SKINE) {
 
 			sim->part_change_type(i, x, y, PT_SCAR);
 		}
