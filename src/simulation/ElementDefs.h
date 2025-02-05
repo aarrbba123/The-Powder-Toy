@@ -31,6 +31,10 @@ constexpr auto PROP_LIFE_KILL_DEC = UINT32_C(0x00010000);  //2^16 Kill when life
 constexpr auto PROP_SPARKSETTLE   = UINT32_C(0x00020000);  //2^17 Allow Sparks/Embers to settle
 constexpr auto PROP_NOAMBHEAT     = UINT32_C(0x00040000);  //2^18 Don't transfer or receive heat from ambient heat.
 constexpr auto PROP_NOCTYPEDRAW   = UINT32_C(0x00100000); // 2^20 When this element is drawn upon with, do not set ctype (like BCLN for CLNE)
+// Biology Portion
+constexpr auto TYPE_BIO           = UINT32_C(0x00200000); // 2^21 Flag for biological materials
+constexpr auto TYPE_DISEASE       = UINT32_C(0x00400000); // 2^22 Flag for immune-targeted materials
+constexpr auto TYPE_FOOD          = UINT32_C(0x00800000); // 2^23 Flag for digestable materials
 
 constexpr auto FLAG_STAGNANT      = UINT32_C(0x00000001);
 constexpr auto FLAG_SKIPMOVE      = UINT32_C(0x00000002); // skip movement for one frame, only implemented for PHOT

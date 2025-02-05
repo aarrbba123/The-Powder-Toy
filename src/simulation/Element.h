@@ -14,6 +14,12 @@ struct Particle;
 class Element
 {
 public:
+	// Biology additions
+	int Max_O2;
+    int Max_CO2;
+    int O2_Usage;
+    int Max_Health;
+
 	ByteString Identifier;
 	String Name;
 	RGB Colour;

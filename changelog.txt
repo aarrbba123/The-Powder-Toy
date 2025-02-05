@@ -1,3 +1,14 @@
-# This file is used by the starcatcher.us update server to pull changelogs for mod releases
-# Erase and replace the changelog for every release, do not just append changes to the end
-# Lines starting with # and empty lines are ignored
+Version 1.0.0
+
+Added digestive system and new biology helper methods.
+
+Added
+- STOM
+- SACID
+- INTE
+- GLUC
+- SVLV
+- MUCO
+- DIGE
+
+... and probably more.

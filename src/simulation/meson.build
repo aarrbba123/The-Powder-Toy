@@ -9,6 +9,7 @@ simulation_files = files(
 	'Sign.cpp',
 	'SimulationData.cpp',
 	'Simulation.cpp',
+	'Biology.cpp',
 	'StructProperty.cpp',
 )
 

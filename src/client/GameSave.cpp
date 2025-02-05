@@ -1310,6 +1310,12 @@ void GameSave::readOPS(const std::vector<char> &data)
 						}
 					}
 				}
+
+				// TODO: Make this actually save and load properly
+				particles[newIndex].bio.health = 100;
+				particles[newIndex].bio.o2 = 50;
+				particles[newIndex].bio.glucose = 50;
+
 				if (PressureInTmp3(particles[newIndex].type))
 				{
 					// pavg[1] used to be saved as a u16, which PressureInTmp3 elements then treated as

@@ -8,6 +8,7 @@
 #include "ElementGraphics.h"
 #include "Simulation.h"
 #include "SimulationData.h"
+#include "Biology.h"
 #include "graphics/Renderer.h"
 #include "TransitionConstants.h"
 #include <algorithm>
