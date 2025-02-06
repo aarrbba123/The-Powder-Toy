@@ -120,9 +120,9 @@ static int graphics(GRAPHICS_FUNC_ARGS)
 	*pixel_mode |= PMODE_BLUR;
 
 	// Life mix
-	*colr = int(*colr * (cpart->bio.health) / 100.0f);
-	*colg = int(*colg * (cpart->bio.health) / 100.0f);
-	*colb = int(*colb * (cpart->bio.health) / 100.0f);
+	*colr = int(*colr * (cpart->bio.health) / 250.0f);
+	*colg = int(*colg * (cpart->bio.health) / 250.0f);
+	*colb = int(*colb * (cpart->bio.health) / 250.0f);
 
 	return 0;
 }
