@@ -132,10 +132,10 @@ static int update(UPDATE_FUNC_ARGS)
 
 static int graphics(GRAPHICS_FUNC_ARGS)
 {
-	// Life mix
-	*colr = int(*colr * (cpart->bio.health) / 100.0f);
-	*colg = int(*colg * (cpart->bio.health) / 100.0f);
-	*colb = int(*colb * (cpart->bio.health) / 100.0f);
+	// Life mix + base colour
+	*colr = int(224 * (cpart->bio.health) / 100.0f);
+	*colg = int(230 * (cpart->bio.health) / 100.0f);
+	*colb = int(154 * (cpart->bio.health) / 100.0f);
 
 	return 0;
 }

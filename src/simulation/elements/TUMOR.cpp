@@ -114,15 +114,15 @@ static int graphics(GRAPHICS_FUNC_ARGS)
     // C02
     int c = cpart->bio.co2;
 
-	*colr = (int)fmax(3 * o, 77);
-	*colg = (int)fmax(3 * o, 62);
-	*colb = (int)fmax(3 * o, 62);
+	*colr = (int)fmin(95, fmax(3 * o, 77));
+	*colg = (int)fmin(69, fmax(3 * o, 62));
+	*colb = (int)fmin(69, fmax(3 * o, 62));
 	*pixel_mode |= PMODE_BLUR;
 
 	// Life mix
-	*colr = int(*colr * (cpart->bio.health) / 250.0f);
-	*colg = int(*colg * (cpart->bio.health) / 250.0f);
-	*colb = int(*colb * (cpart->bio.health) / 250.0f);
+	*colr = int(*colr * (cpart->bio.health) / 140.0f);
+	*colg = int(*colg * (cpart->bio.health) / 140.0f);
+	*colb = int(*colb * (cpart->bio.health) / 140.0f);
 
 	return 0;
 }
