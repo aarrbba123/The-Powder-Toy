@@ -518,7 +518,7 @@ static void pushParticle(Simulation * sim, int i, int count, int original)
 			auto r = sim->pmap[y+ry][x+rx];
 			if (!r)
 				continue;
-			else if ((TYP(r)==PT_PIPE || TYP(r) == PT_PPIP) && (sim->parts[ID(r)].tmp&PFLAG_COLORS) != notctype && !TYP(sim->parts[ID(r)].ctype))
+			else if ((TYP(r)==PT_PIPE || TYP(r)==PT_BVES || TYP(r) == PT_PPIP) && (sim->parts[ID(r)].tmp&PFLAG_COLORS) != notctype && !TYP(sim->parts[ID(r)].ctype))
 			{
 				transfer_pipe_to_pipe(sim->parts+i, sim->parts+(ID(r)), false);
 				if (ID(r) > original)

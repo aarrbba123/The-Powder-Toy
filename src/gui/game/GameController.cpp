@@ -1515,7 +1515,8 @@ void GameController::ClearSim()
 }
 
 bool GameController::IsBio(int id){
-	return gameModel->GetSimulation()->elements[id].Properties & TYPE_BIO;
+	auto &sd = SimulationData::CRef();
+	return sd.elements[id].Properties & TYPE_BIO;
 }
 
 String GameController::ElementResolve(int type, int ctype)

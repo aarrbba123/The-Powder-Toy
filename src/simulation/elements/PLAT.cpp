@@ -7,7 +7,7 @@ void Element::Element_PLAT()
 {
 	Identifier = "DEFAULT_PT_PLAT";
 	Name = "PLAT";
-	Colour = PIXPACK(0xaa8800);
+	Colour = 0xaa8800_rgb;
 	MenuVisible = 1;
 	MenuSection = SC_BIO;
 	Enabled = 1;
@@ -49,14 +49,14 @@ void Element::Element_PLAT()
 
 static int update(UPDATE_FUNC_ARGS)
 {
-    if (!RNG::Ref().chance(1, 5)) return 0;
+    if (!sim->rng.chance(1, 5)) return 0;
 
 	int r, rx, ry;
 
-    rx =  RNG::Ref().between(-2, 2);
-    ry =  RNG::Ref().between(-2, 2);
+    rx =  sim->rng.between(-2, 2);
+    ry =  sim->rng.between(-2, 2);
 
-    if (BOUNDS_CHECK && (rx || ry))
+    if (rx || ry)
     {
         r = pmap[y+ry][x+rx];
         int target_type = TYP(r);

@@ -4,7 +4,7 @@ void Element::Element_GLUC()
 {
 	Identifier = "DEFAULT_PT_GLUC";
 	Name = "GLUC";
-	Colour = PIXPACK(0xFFFFFF);
+	Colour = 0xFFFFFF_rgb;
 	MenuVisible = 1;
 	MenuSection = SC_BIO;
 	Enabled = 1;

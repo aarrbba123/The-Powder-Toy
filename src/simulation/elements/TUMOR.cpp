@@ -7,7 +7,7 @@ void Element::Element_TUMOR()
 {
 	Identifier = "DEFAULT_PT_TUMOR";
 	Name = "TUMR";
-	Colour = PIXPACK(0x554040);
+	Colour = 0x554040_rgb;
 	MenuVisible = 1;
 	MenuSection = SC_BIO;
 	Enabled = 1;
@@ -59,16 +59,16 @@ void Element::Element_TUMOR()
 static int update(UPDATE_FUNC_ARGS)
 {
 	// O2 use itself (Increased due to increased biological activity)
-    Biology::UseO2(100, UPDATE_FUNC_IN);
+    Biology::UseO2(100, UPDATE_FUNC_SUBCALL_ARGS);
 	// Steal resources from biological material
-	Biology::StealResources(2, 2, UPDATE_FUNC_IN);
+	Biology::StealResources(2, 2, UPDATE_FUNC_SUBCALL_ARGS);
 
 	int r, rx, ry;
 
-    rx =  RNG::Ref().between(-2, 2);
-    ry =  RNG::Ref().between(-2, 2);
+    rx =  sim->rng.between(-2, 2);
+    ry =  sim->rng.between(-2, 2);
     
-    if (RNG::Ref().chance(1, 2000) && (BOUNDS_CHECK && (rx || ry)))
+    if (sim->rng.chance(1, 2000) && (rx || ry))
     {
         r = pmap[y+ry][x+rx];
 		int target = ID(r);
@@ -81,14 +81,15 @@ static int update(UPDATE_FUNC_ARGS)
 			}	
         }
     }
-	if (RNG::Ref().chance(1, 100)){
+	if (sim->rng.chance(1, 100)){
 
 		r = pmap[y+ry][x+rx];
 		int target = ID(r);
 		int target_type = parts[target].type;
+		auto &sd = SimulationData::CRef();
 
 		// convert biology to tumor (grow)
-		if (sim->elements[target_type].Properties & TYPE_BIO && target_type != PT_TUMOR){
+		if (sd.elements[target_type].Properties & TYPE_BIO && target_type != PT_TUMOR){
 			
 			sim->part_change_type(target, parts[target].x, parts[target].y, PT_TUMOR);
 			parts[i].bio.o2--;
@@ -97,10 +98,10 @@ static int update(UPDATE_FUNC_ARGS)
 	}
 
 	// Health related things
-	Biology::DoHeatDamage(50, 323.15, 273, UPDATE_FUNC_IN);
-	Biology::DoRespirationDamage(50, UPDATE_FUNC_IN);
-	Biology::DoHealing(50, UPDATE_FUNC_IN);
-	Biology::HandleDeath(UPDATE_FUNC_IN);
+	Biology::DoHeatDamage(50, 323.15, 273, UPDATE_FUNC_SUBCALL_ARGS);
+	Biology::DoRespirationDamage(50, UPDATE_FUNC_SUBCALL_ARGS);
+	Biology::DoHealing(50, UPDATE_FUNC_SUBCALL_ARGS);
+	Biology::HandleDeath(UPDATE_FUNC_SUBCALL_ARGS);
 
 	return 0;
 }

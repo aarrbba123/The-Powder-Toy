@@ -4,7 +4,7 @@ void Element::Element_POOP()
 {
 	Identifier = "DEFAULT_PT_POOP";
 	Name = "POOP";
-	Colour = PIXPACK(0x403030);
+	Colour = 0x403030_rgb;
 	MenuVisible = 1;
 	MenuSection = SC_BIO;
 	Enabled = 1;

@@ -7,7 +7,7 @@ void Element::Element_INTE()
 {
 	Identifier = "DEFAULT_PT_INTE";
 	Name = "INTE";
-	Colour = PIXPACK(0x890065);
+	Colour = 0x890065_rgb;
 	MenuVisible = 1;
 	MenuSection = SC_BIO;
 	Enabled = 1;
@@ -63,28 +63,28 @@ void Element::Element_INTE()
 static int update(UPDATE_FUNC_ARGS)
 {
 	// O2 use by cells
-	Biology::UseO2(100, UPDATE_FUNC_IN);
+	Biology::UseO2(100, UPDATE_FUNC_SUBCALL_ARGS);
 	// Diffuse resources
-	Biology::DiffuseResources(2, 2, UPDATE_FUNC_IN);
+	Biology::DiffuseResources(2, 2, UPDATE_FUNC_SUBCALL_ARGS);
 	// Radiation damage
-	Biology::DoRadiationDamage(2, 2, UPDATE_FUNC_IN);
+	Biology::DoRadiationDamage(2, 2, UPDATE_FUNC_SUBCALL_ARGS);
 	// Damage from extreme heat or cold
-	Biology::DoHeatDamage(5, 323.15, 273, UPDATE_FUNC_IN);
+	Biology::DoHeatDamage(5, 323.15, 273, UPDATE_FUNC_SUBCALL_ARGS);
 	// Damage from lack of O2 or too much CO2
-	Biology::DoRespirationDamage(100, UPDATE_FUNC_IN);
+	Biology::DoRespirationDamage(100, UPDATE_FUNC_SUBCALL_ARGS);
 	// Heal naturally
-	Biology::DoHealing(100, UPDATE_FUNC_IN);
+	Biology::DoHealing(100, UPDATE_FUNC_SUBCALL_ARGS);
 	// Death check
-	Biology::HandleDeath(UPDATE_FUNC_IN);
+	Biology::HandleDeath(UPDATE_FUNC_SUBCALL_ARGS);
 
     if (parts[i].bio.o2 > 5 && parts[i].bio.health > 75) {
 
         // Needs to be somewhat healthy to absorb nutrients
-        if (RNG::Ref().chance(1, 100)){
-            int rand_x =  RNG::Ref().between(-1, 1);
-            int rand_y =  RNG::Ref().between(-1, 1);
+        if (sim->rng.chance(1, 100)){
+            int rand_x =  sim->rng.between(-1, 1);
+            int rand_y =  sim->rng.between(-1, 1);
 
-            if (BOUNDS_CHECK && (rand_x || rand_y)){ 
+            if (rand_x || rand_y){ 
 
                 int pos = pmap[y + rand_y][x + rand_x];
                 int t = TYP(pos);
@@ -95,7 +95,7 @@ static int update(UPDATE_FUNC_ARGS)
                 }
             }
             // SQUEEZE
-            sim->pv[y/CELL][x/CELL] = RNG::Ref().between(-5, 5);
+            sim->pv[y/CELL][x/CELL] = sim->rng.between(-5, 5);
         }
     }
 

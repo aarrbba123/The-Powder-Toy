@@ -1,6 +1,6 @@
 #include "ElementCommon.h"
 
-#define CHANCE(chance) RNG::Ref().chance(1, chance)
+#define CHANCE(chance) sim->rng.chance(1, chance)
 
 Biology::Biology()
 {
@@ -26,10 +26,10 @@ void Biology::AttackBio(int chance, int range, int damage, UPDATE_FUNC_ARGS){
 
 	int rand_x, rand_y;
 
-	rand_x =  RNG::Ref().between(-range, range);
-	rand_y =  RNG::Ref().between(-range, range);
+	rand_x =  sim->rng.between(-range, range);
+	rand_y =  sim->rng.between(-range, range);
 
-	if (!(BOUNDS_CHECK && (rand_x || rand_y))) return;
+	if (!(rand_x || rand_y)) return;
 
 	int pos = pmap[y + rand_y][x + rand_x];
 
@@ -37,8 +37,9 @@ void Biology::AttackBio(int chance, int range, int damage, UPDATE_FUNC_ARGS){
 	int target_type  = parts[target].type;
 	int this_type = parts[i].type;
 
-	Element this_element = sim->elements[this_type];
-	Element target_element = sim->elements[target_type];
+	auto &sd = SimulationData::CRef();
+	Element this_element = sd.elements[this_type];
+	Element target_element = sd.elements[target_type];
 
 	// Don't harm own type
 	if (this_type == target_type || target_type == 0) return;
@@ -95,7 +96,8 @@ void Biology::DoRespirationDamage(int chance, UPDATE_FUNC_ARGS){
 	if (!CHANCE(chance)) return;
 
 	int this_type = parts[i].type;
-	Element this_element = sim->elements[this_type];
+	auto &sd = SimulationData::CRef();
+	Element this_element = sd.elements[this_type];
 
 	// Damage check
 	if (parts[i].bio.co2 > this_element.Max_CO2 || parts[i].bio.o2 < 1 || parts[i].bio.glucose < 1){
@@ -107,7 +109,8 @@ void Biology::DoHealing(int chance, UPDATE_FUNC_ARGS){
 	if (!CHANCE(chance)) return;
 
 	int this_type = parts[i].type;
-	Element this_element = sim->elements[this_type];
+	auto &sd = SimulationData::CRef();
+	Element this_element = sd.elements[this_type];
 
 	if (parts[i].bio.health < this_element.Max_Health && 
 		parts[i].bio.o2 > this_element.Max_O2 / 2){
@@ -126,7 +129,8 @@ void Biology::GrowInRange(int chance, int range, int grow_on, UPDATE_FUNC_ARGS){
 	if (!CHANCE(chance)) return;
 
 	int this_type = parts[i].type;
-	Element this_element = sim->elements[this_type];
+	auto &sd = SimulationData::CRef();
+	Element this_element = sd.elements[this_type];
 
 	// Require over half health
 	if (!(parts[i].bio.health > (this_element.Max_Health / 2))) return;
@@ -138,10 +142,10 @@ void Biology::GrowInRange(int chance, int range, int grow_on, UPDATE_FUNC_ARGS){
 
 	int rand_x, rand_y;
 
-	rand_x =  RNG::Ref().between(-range, range);
-	rand_y =  RNG::Ref().between(-range, range);
+	rand_x =  sim->rng.between(-range, range);
+	rand_y =  sim->rng.between(-range, range);
 
-	if (!(BOUNDS_CHECK && (rand_x || rand_y))) return;
+	if (!(rand_x || rand_y)) return;
 
 	int pos = pmap[y + rand_y][x + rand_x];
 	int target = ID(pos);
@@ -174,10 +178,10 @@ void Biology::DiffuseResources(int chance, int range, UPDATE_FUNC_ARGS){
 
 	int rand_x, rand_y;
 
-	rand_x =  RNG::Ref().between(-range, range);
-	rand_y =  RNG::Ref().between(-range, range);
+	rand_x =  sim->rng.between(-range, range);
+	rand_y =  sim->rng.between(-range, range);
 
-	if (!(BOUNDS_CHECK && (rand_x || rand_y))) return;
+	if (!(rand_x || rand_y)) return;
 
 	int pos = pmap[y + rand_y][x + rand_x];
 
@@ -186,11 +190,12 @@ void Biology::DiffuseResources(int chance, int range, UPDATE_FUNC_ARGS){
 
 	if (!target) return;
 
-	Element target_element = sim->elements[target_type];
+	auto &sd = SimulationData::CRef();
+	Element target_element = sd.elements[target_type];
 
 	// Diffuse among bio
-	if (sim->elements[target_type].Properties & TYPE_BIO && // Must be bio
-		!(sim->elements[target_type].Properties & TYPE_DISEASE)) // Must not be disease) 
+	if (sd.elements[target_type].Properties & TYPE_BIO && // Must be bio
+		!(sd.elements[target_type].Properties & TYPE_DISEASE)) // Must not be disease) 
 	{
 
 		// Only blood should give O2 to blood - tissue should not hand it back
@@ -238,10 +243,10 @@ void Biology::DoRadiationDamage(int chance, int range, UPDATE_FUNC_ARGS){
 
 	int rand_x, rand_y;
 
-	rand_x = RNG::Ref().between(-range, range);
-	rand_y = RNG::Ref().between(-range, range);
+	rand_x = sim->rng.between(-range, range);
+	rand_y = sim->rng.between(-range, range);
 
-	if (!(BOUNDS_CHECK && (rand_x || rand_y))) return;
+	if (!(rand_x || rand_y)) return;
 
 	int pos = pmap[y + rand_y][x + rand_x];
 	int nuc_pos = sim->photons[y][x];
@@ -252,16 +257,18 @@ void Biology::DoRadiationDamage(int chance, int range, UPDATE_FUNC_ARGS){
 	int nuc = ID(nuc_pos);
 	int nuc_type  = parts[nuc].type;
 
+	auto &sd = SimulationData::CRef();
+
 	if (target_type){
-		Element target_element = sim->elements[target_type];
-		Element nuc_element = sim->elements[nuc_type];
+		Element target_element = sd.elements[target_type];
+		Element nuc_element = sd.elements[nuc_type];
 
 		if (target_element.MenuSection == SC_NUCLEAR ||
 			nuc_element.MenuSection == SC_NUCLEAR){
 
 			parts[i].bio.radDamage++;
 			parts[i].bio.health--;
-			if (RNG::Ref().chance(parts[i].bio.radDamage, 100000)){
+			if (sim->rng.chance(parts[i].bio.radDamage, 100000)){
 				sim->part_change_type(i, x, y, PT_TUMOR);
 			}
 		}
@@ -273,10 +280,10 @@ bool Biology::TryCollect(int chance, int range, int type, UPDATE_FUNC_ARGS){
 
 	int rand_x, rand_y;
 
-	rand_x =  RNG::Ref().between(-range, range);
-	rand_y =  RNG::Ref().between(-range, range);
+	rand_x =  sim->rng.between(-range, range);
+	rand_y =  sim->rng.between(-range, range);
 
-	if (!(BOUNDS_CHECK && (rand_x || rand_y))) return false;
+	if (!(rand_x || rand_y)) return false;
 
 	int pos = pmap[y + rand_y][x + rand_x];
 	int target = ID(pos);
@@ -295,17 +302,18 @@ void Biology::StealResources(int chance, int range, UPDATE_FUNC_ARGS){
 
 	int rand_x, rand_y;
 
-	rand_x = RNG::Ref().between(-range, range);
-	rand_y = RNG::Ref().between(-range, range);
+	rand_x = sim->rng.between(-range, range);
+	rand_y = sim->rng.between(-range, range);
 
-	if (!(BOUNDS_CHECK && (rand_x || rand_y))) return;
+	if (!(rand_x || rand_y)) return;
 
 	int pos = pmap[y + rand_y][x + rand_x];
 	int target = ID(pos);
 	int target_type = parts[target].type;
+	auto &sd = SimulationData::CRef();
 
 	// steal o2 from bio, offload co2 to bio (tumor is greedy)
-	if (sim->elements[target_type].Properties & TYPE_BIO){
+	if (sd.elements[target_type].Properties & TYPE_BIO){
 		if (parts[target].bio.o2 > 1){
 			parts[i].bio.o2++;
 			parts[target].bio.o2--;
@@ -327,10 +335,10 @@ bool Biology::AttackDisease(int chance, int range, int damage, UPDATE_FUNC_ARGS)
 
 	int rand_x, rand_y;
 
-	rand_x =  RNG::Ref().between(-range, range);
-	rand_y =  RNG::Ref().between(-range, range);
+	rand_x =  sim->rng.between(-range, range);
+	rand_y =  sim->rng.between(-range, range);
 
-	if (!(BOUNDS_CHECK && (rand_x || rand_y))) return false;
+	if (!(rand_x || rand_y)) return false;
 
 	int pos = pmap[y + rand_y][x + rand_x];
 	int target = ID(pos);
@@ -338,8 +346,9 @@ bool Biology::AttackDisease(int chance, int range, int damage, UPDATE_FUNC_ARGS)
 
 	int this_type = parts[i].type;
 
-	Element this_element = sim->elements[this_type];
-	Element target_element = sim->elements[target_type];
+	auto &sd = SimulationData::CRef();
+	Element this_element = sd.elements[this_type];
+	Element target_element = sd.elements[target_type];
 
 	// Only hurt disease
 	if (!(target_element.Properties & TYPE_DISEASE)) return false;

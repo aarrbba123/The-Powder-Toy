@@ -7,7 +7,7 @@ void Element::Element_MEAT()
 {
 	Identifier = "DEFAULT_PT_MEAT";
 	Name = "MEAT";
-	Colour = PIXPACK(0x990022);
+	Colour = 0x990022_rgb;
 	MenuVisible = 1;
 	MenuSection = SC_BIO;
 	Enabled = 1;
@@ -63,19 +63,19 @@ void Element::Element_MEAT()
 static int update(UPDATE_FUNC_ARGS)
 {
 	// O2 use by cells
-	Biology::UseO2(100, UPDATE_FUNC_IN);
+	Biology::UseO2(100, UPDATE_FUNC_SUBCALL_ARGS);
 	// Diffuse resources
-	Biology::DiffuseResources(2, 2, UPDATE_FUNC_IN);
+	Biology::DiffuseResources(2, 2, UPDATE_FUNC_SUBCALL_ARGS);
 	// Radiation damage
-	Biology::DoRadiationDamage(2, 2, UPDATE_FUNC_IN);
+	Biology::DoRadiationDamage(2, 2, UPDATE_FUNC_SUBCALL_ARGS);
 	// Damage from extreme heat or cold
-	Biology::DoHeatDamage(5, 323.15, 273, UPDATE_FUNC_IN);
+	Biology::DoHeatDamage(5, 323.15, 273, UPDATE_FUNC_SUBCALL_ARGS);
 	// Damage from lack of O2 or too much CO2
-	Biology::DoRespirationDamage(100, UPDATE_FUNC_IN);
+	Biology::DoRespirationDamage(100, UPDATE_FUNC_SUBCALL_ARGS);
 	// Heal naturally
-	Biology::DoHealing(100, UPDATE_FUNC_IN);
+	Biology::DoHealing(100, UPDATE_FUNC_SUBCALL_ARGS);
 	// Death check
-	Biology::HandleDeath(UPDATE_FUNC_IN);
+	Biology::HandleDeath(UPDATE_FUNC_SUBCALL_ARGS);
 
 	return 0;
 }
