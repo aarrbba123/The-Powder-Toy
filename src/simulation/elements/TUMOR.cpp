@@ -111,9 +111,6 @@ static int graphics(GRAPHICS_FUNC_ARGS)
     // Oxygen
     int o = cpart->bio.o2;
 
-    // C02
-    int c = cpart->bio.co2;
-
 	*colr = (int)fmin(95, fmax(3 * o, 77));
 	*colg = (int)fmin(69, fmax(3 * o, 62));
 	*colb = (int)fmin(69, fmax(3 * o, 62));

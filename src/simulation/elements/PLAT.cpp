@@ -1,7 +1,7 @@
 #include "simulation/ElementCommon.h"
 
 static int update(UPDATE_FUNC_ARGS);
-static int graphics(GRAPHICS_FUNC_ARGS);
+// static int graphics(GRAPHICS_FUNC_ARGS);
 
 void Element::Element_PLAT()
 {

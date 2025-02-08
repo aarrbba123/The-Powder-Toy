@@ -91,8 +91,7 @@ static int graphics(GRAPHICS_FUNC_ARGS)
     // C02
     int c = cpart->bio.co2;
 
-	int q = cpart->bio.o2;
-
+	// Air mix
 	int d = o - c;
 
 

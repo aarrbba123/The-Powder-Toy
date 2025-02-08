@@ -117,7 +117,6 @@ static int graphics(GRAPHICS_FUNC_ARGS)
     // C02
     int c = cpart->bio.co2 / 3;
 
-	int q = cpart->bio.o2;
 	*colr = (int)fmax(3 * o, 75);
 	*colg = 0;
 	*colb = 8 * c;

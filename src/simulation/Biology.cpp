@@ -24,10 +24,8 @@ void Biology::UseO2(int chance, UPDATE_FUNC_ARGS){
 void Biology::AttackBio(int chance, int range, int damage, UPDATE_FUNC_ARGS){
 	if (!CHANCE(chance)) return;
 
-	int rand_x, rand_y;
-
-	rand_x =  sim->rng.between(-range, range);
-	rand_y =  sim->rng.between(-range, range);
+	int rand_x =  sim->rng.between(-range, range);
+	int rand_y =  sim->rng.between(-range, range);
 
 	if (!(rand_x || rand_y)) return;
 
@@ -87,9 +85,10 @@ void Biology::DoHeatDamage(int chance, double max_temp, double min_temp, UPDATE_
 		int damage = ((parts[i].temp - max_temp) / 10) + 1;
 		parts[i].bio.health -= damage;
 	}
+	/*
 	else if (parts[i].temp < min_temp){
 		int damage = ((-(min_temp - (parts[i].temp))) / 10) + 1;
-	}
+	} */
 }
 
 void Biology::DoRespirationDamage(int chance, UPDATE_FUNC_ARGS){
@@ -140,10 +139,8 @@ void Biology::GrowInRange(int chance, int range, int grow_on, UPDATE_FUNC_ARGS){
 	// Require over 50 glucose
 	if (!(parts[i].bio.glucose > 50)) return;
 
-	int rand_x, rand_y;
-
-	rand_x =  sim->rng.between(-range, range);
-	rand_y =  sim->rng.between(-range, range);
+	int rand_x =  sim->rng.between(-range, range);
+	int rand_y =  sim->rng.between(-range, range);
 
 	if (!(rand_x || rand_y)) return;
 
@@ -176,12 +173,10 @@ void Biology::GrowInRange(int chance, int range, int grow_on, UPDATE_FUNC_ARGS){
 void Biology::DiffuseResources(int chance, int range, UPDATE_FUNC_ARGS){
 	if (!CHANCE(chance)) return;
 
-	int rand_x, rand_y;
+	int rand_x =  sim->rng.between(-range, range);
+	int rand_y =  sim->rng.between(-range, range);
 
-	rand_x =  sim->rng.between(-range, range);
-	rand_y =  sim->rng.between(-range, range);
-
-	if (!(rand_x || rand_y)) return;
+	if (!(rand_x || rand_y)) return; // I seriously don't know what this is.
 
 	int pos = pmap[y + rand_y][x + rand_x];
 
@@ -191,30 +186,29 @@ void Biology::DiffuseResources(int chance, int range, UPDATE_FUNC_ARGS){
 	if (!target) return;
 
 	auto &sd = SimulationData::CRef();
-	Element target_element = sd.elements[target_type];
+	auto &elements = sd.elements;
+	Element target_element = elements[target_type];
 
 	// Diffuse among bio
-	if (sd.elements[target_type].Properties & TYPE_BIO && // Must be bio
-		!(sd.elements[target_type].Properties & TYPE_DISEASE)) // Must not be disease) 
+	if (elements[target_type].Properties & TYPE_BIO && // Must be bio
+	   !(elements[target_type].Properties & TYPE_DISEASE)) // Must not be disease
 	{
 
 		// Only blood should give O2 to blood - tissue should not hand it back
 		if (parts[i].type == PT_BLD || target_type != PT_BLD){
 			// Bio should not recieve o2 if it's full, unless the target is blood (blood to blood).
 			if (parts[i].bio.o2 > parts[target].bio.o2 && (target_type == PT_BLD || parts[target].bio.o2 < target_element.Max_O2)){
-				// Same as this
-				int amount = 0;
+				int amount;
 				if (target_type != PT_BLD)
 					amount = (int)fmin((parts[i].bio.o2 - parts[target].bio.o2) / 2, target_element.Max_O2 - parts[target].bio.o2);
 				else
 					amount = (parts[i].bio.o2 - parts[target].bio.o2) / 2;
 
-				//if the target's amount is close to maximum, and the amount being added will exceed the maximum, cap the amount of o2 so it will be = to target's max_o2 when added.
+				//if the target's o2 is close to maximum, and the amount being added will exceed the maximum, cap the amount of o2 so it will be = to target's max_o2 when added.
 				//Im sure there is a much faster way to do this but for now, here it is.
-				if (parts[target].bio.o2 + amount > target_element.Max_O2) {
+				if (parts[target].bio.o2 + amount > target_element.Max_O2)
 					amount -= (amount - (target_element.Max_O2 - parts[target].bio.o2));
-				}
-
+				
 				parts[i].bio.o2 -= amount;
 				parts[target].bio.o2 += amount;
 			}
@@ -222,7 +216,7 @@ void Biology::DiffuseResources(int chance, int range, UPDATE_FUNC_ARGS){
 
 		if (parts[i].bio.glucose > parts[target].bio.glucose){
 
-			int amount = (parts[i].bio.glucose - parts[target].bio.glucose) / 2;
+			int amount = (int)fmin((parts[i].bio.glucose - parts[target].bio.glucose) / 2, parts[i].bio.co2 - parts[target].bio.co2);
 
 			parts[i].bio.glucose -= amount;
 			parts[target].bio.glucose += amount;
@@ -230,7 +224,7 @@ void Biology::DiffuseResources(int chance, int range, UPDATE_FUNC_ARGS){
 
 		if (parts[i].bio.co2 > parts[target].bio.co2){
 
-			int amount = (parts[i].bio.co2 - parts[target].bio.co2) / 2;
+			int amount = (int)fmin((parts[i].bio.co2 - parts[target].bio.co2) / 2, parts[i].bio.co2 - parts[target].bio.co2);
 
 			parts[i].bio.co2 -= amount;
 			parts[target].bio.co2 += amount;
@@ -258,10 +252,11 @@ void Biology::DoRadiationDamage(int chance, int range, UPDATE_FUNC_ARGS){
 	int nuc_type  = parts[nuc].type;
 
 	auto &sd = SimulationData::CRef();
+	auto &elements = sd.elements;
 
 	if (target_type){
-		Element target_element = sd.elements[target_type];
-		Element nuc_element = sd.elements[nuc_type];
+		Element target_element = elements[target_type];
+		Element nuc_element = elements[nuc_type];
 
 		if (target_element.MenuSection == SC_NUCLEAR ||
 			nuc_element.MenuSection == SC_NUCLEAR){

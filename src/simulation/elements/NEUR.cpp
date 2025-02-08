@@ -62,7 +62,7 @@ void Element::Element_NEUR()
 static int update(UPDATE_FUNC_ARGS)
 {
 
-    int r, nnx, nny, rx, ry;
+    int r, rx, ry;
 
 	// NOTE: Neurons are fast to die and slow to heal
 

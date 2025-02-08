@@ -58,7 +58,7 @@ static int update(UPDATE_FUNC_ARGS)
         while (rtype == PT_GGOO || rtype == PT_RGOO || rtype == PT_VIRS || rtype == PT_LIFE || 
         rtype == PT_VRSS || rtype == PT_VRSG);
 
-        int np = sim->create_part(-1, x + sim->rng.between(-1, 1), y + sim->rng.between(-1, 1), rtype);
+        sim->create_part(-1, x + sim->rng.between(-1, 1), y + sim->rng.between(-1, 1), rtype);
     }
 	
 	return 0;

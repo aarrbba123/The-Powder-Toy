@@ -58,7 +58,7 @@ static int update(UPDATE_FUNC_ARGS)
         }
         while (!(sd.elements[rtype].MenuSection == SC_NUCLEAR));
 
-        int np = sim->create_part(-1, x + sim->rng.between(-1, 1), y + sim->rng.between(-1, 1), rtype);
+        sim->create_part(-1, x + sim->rng.between(-1, 1), y + sim->rng.between(-1, 1), rtype);
     }
 	
 	return 0;

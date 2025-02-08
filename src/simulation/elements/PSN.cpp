@@ -73,12 +73,9 @@ static int update(UPDATE_FUNC_ARGS)
 static int graphics(GRAPHICS_FUNC_ARGS)
 {
     // Oxygen
-    int o = cpart->tmp;
+	// Newer versions use o2 instead of tmp
+	int o = cpart->bio.o2;
 
-    // C02
-    int c = cpart->bio.co2;
-
-	int q = cpart->bio.o2;
 	*colr = 0;
 	*colg = (int)fmax(9 * o, 75);;
 	*colb = 0;

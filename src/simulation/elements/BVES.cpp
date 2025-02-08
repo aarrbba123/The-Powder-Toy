@@ -408,7 +408,7 @@ int Element_BVES_update(UPDATE_FUNC_ARGS)
 					if (!r)
 					{
 						// BRCK border
-						int index = sim->create_part(-1,x+rx,y+ry,PT_MEAT);
+						sim->create_part(-1,x+rx,y+ry,PT_MEAT);
 					}
 				}
 			}
@@ -477,9 +477,6 @@ int Element_BVES_graphics(GRAPHICS_FUNC_ARGS)
 		}
 		else
 		{
-			// Temp particle used for graphics.
-			Particle tpart = *cpart;
-
 			// We emulate the graphics of the stored particle. We need a const Particle *cpart to pass to the graphics function,
 			// but we don't have a Particle that is populated the way the graphics function expects, so we construct a temporary
 			// one and present that to it.
