@@ -7,7 +7,7 @@ void Element::Element_SCAR()
 {
 	Identifier = "DEFAULT_PT_SCAR";
 	Name = "SCAR";
-	Colour = PIXPACK(0xd8a87B);
+	Colour = 0xd8a87B_rgb;
 	MenuVisible = 1;
 	MenuSection = SC_BIO;
 	Enabled = 1;
@@ -62,20 +62,20 @@ void Element::Element_SCAR()
 static int update(UPDATE_FUNC_ARGS)
 {
     // O2 use itself
-    Biology::UseO2(150, UPDATE_FUNC_IN);
+    Biology::UseO2(150, UPDATE_FUNC_SUBCALL_ARGS);
     // Diffuse resources
-	Biology::DiffuseResources(2, 2, UPDATE_FUNC_IN);
+	Biology::DiffuseResources(2, 2, UPDATE_FUNC_SUBCALL_ARGS);
     // Radiation damage
-	Biology::DoRadiationDamage(2, 2, UPDATE_FUNC_IN);
+	Biology::DoRadiationDamage(2, 2, UPDATE_FUNC_SUBCALL_ARGS);
 	// Damage from extreme heat or cold
 	// Skin is a bit more resilient against temperature
-	Biology::DoHeatDamage(20, 323.15, 273, UPDATE_FUNC_IN);
+	Biology::DoHeatDamage(20, 323.15, 273, UPDATE_FUNC_SUBCALL_ARGS);
 	// Damage from lack of O2 or too much CO2
-	Biology::DoRespirationDamage(100, UPDATE_FUNC_IN);
+	Biology::DoRespirationDamage(100, UPDATE_FUNC_SUBCALL_ARGS);
 	// Heal naturally
-	Biology::DoHealing(100, UPDATE_FUNC_IN);
+	Biology::DoHealing(100, UPDATE_FUNC_SUBCALL_ARGS);
 	// Death check
-	Biology::HandleDeath(UPDATE_FUNC_IN);
+	Biology::HandleDeath(UPDATE_FUNC_SUBCALL_ARGS);
 
 	return 0;
 }

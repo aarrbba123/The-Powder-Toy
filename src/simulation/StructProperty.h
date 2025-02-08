@@ -1,8 +1,13 @@
-#ifndef STRUCTPROPERTY_H_
-#define STRUCTPROPERTY_H_
-
+#pragma once
 #include "common/String.h"
 #include <cstdint>
+#include <variant>
+
+using PropertyValue = std::variant<
+	int,
+	unsigned int,
+	float
+>;
 
 struct StructProperty
 {
@@ -23,32 +28,14 @@ struct StructProperty
 	PropertyType Type;
 	intptr_t Offset;
 
-	StructProperty(ByteString name, PropertyType type, intptr_t offset):
-	Name(name),
-	Type(type),
-	Offset(offset)
-	{
+	StructProperty();
+	StructProperty(ByteString name, PropertyType type, intptr_t offset);
 
-	}
-
-	StructProperty():
-	Name(""),
-	Type(Integer),
-	Offset(0)
-	{
-
-	}
-};
-
-union PropertyValue {
-	int Integer;
-	unsigned int UInteger;
-	float Float;
+	bool operator ==(const StructProperty &other) const;
+	::String ToString(const PropertyValue &value) const;
 };
 
 struct StructPropertyAlias
 {
 	ByteString from, to;
 };
-
-#endif

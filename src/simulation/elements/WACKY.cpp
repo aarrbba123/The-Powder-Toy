@@ -6,7 +6,7 @@ void Element::Element_WACKY()
 {
 	Identifier = "DEFAULT_PT_WACKY";
 	Name = "WACKY";
-	Colour = PIXPACK(0xFFD010);
+	Colour = 0xFFD010_rgb;
 	MenuVisible = 1;
 	MenuSection = SC_SPECIAL;
 	Enabled = 1;
@@ -47,17 +47,18 @@ void Element::Element_WACKY()
 
 static int update(UPDATE_FUNC_ARGS)
 {
-    if (RNG::Ref().chance(1, 30))
+    if (sim->rng.chance(1, 30))
     {
         int rtype = 0;
+		auto &sd = SimulationData::CRef();
 
         do {
-            rtype = RNG::Ref().between(0, 206);
+            rtype = sim->rng.between(0, 206);
             parts[i].tmp = rtype;
         }
-        while (!(sim->elements[rtype].MenuSection == SC_NUCLEAR));
+        while (!(sd.elements[rtype].MenuSection == SC_NUCLEAR));
 
-        int np = sim->create_part(-1, x + RNG::Ref().between(-1, 1), y + RNG::Ref().between(-1, 1), rtype);
+        sim->create_part(-1, x + sim->rng.between(-1, 1), y + sim->rng.between(-1, 1), rtype);
     }
 	
 	return 0;

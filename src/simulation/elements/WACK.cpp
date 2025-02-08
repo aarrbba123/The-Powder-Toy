@@ -6,7 +6,7 @@ void Element::Element_WACK()
 {
 	Identifier = "DEFAULT_PT_WACK";
 	Name = "WACK";
-	Colour = PIXPACK(0xFFD010);
+	Colour = 0xFFD010_rgb;
 	MenuVisible = 1;
 	MenuSection = SC_SPECIAL;
 	Enabled = 1;
@@ -47,18 +47,18 @@ void Element::Element_WACK()
 
 static int update(UPDATE_FUNC_ARGS)
 {
-    if (RNG::Ref().chance(1, 30))
+    if (sim->rng.chance(1, 30))
     {
         int rtype = 0;
 
         do {
-            rtype = RNG::Ref().between(0, 206);
+            rtype = sim->rng.between(0, 206);
             parts[i].tmp = rtype;
         }
         while (rtype == PT_GGOO || rtype == PT_RGOO || rtype == PT_VIRS || rtype == PT_LIFE || 
         rtype == PT_VRSS || rtype == PT_VRSG);
 
-        int np = sim->create_part(-1, x + RNG::Ref().between(-1, 1), y + RNG::Ref().between(-1, 1), rtype);
+        sim->create_part(-1, x + sim->rng.between(-1, 1), y + sim->rng.between(-1, 1), rtype);
     }
 	
 	return 0;

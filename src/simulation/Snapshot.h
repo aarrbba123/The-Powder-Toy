@@ -1,10 +1,11 @@
 #pragma once
-
-#include <vector>
-
 #include "Particle.h"
 #include "Sign.h"
 #include "Stickman.h"
+#include "common/tpt-rand.h"
+#include <vector>
+#include <array>
+#include <cstdint>
 #include <json/json.h>
 
 class Snapshot
@@ -17,13 +18,15 @@ public:
 
 	std::vector<Particle> Particles;
 
-	std::vector<float> GravVelocityX;
-	std::vector<float> GravVelocityY;
-	std::vector<float> GravValue;
-	std::vector<float> GravMap;
+	std::vector<float> GravForceX;
+	std::vector<float> GravForceY;
+	std::vector<float> GravMass;
+	std::vector<uint32_t> GravMask;
 
 	std::vector<unsigned char> BlockMap;
 	std::vector<unsigned char> ElecMap;
+	std::vector<unsigned char> BlockAir;
+	std::vector<unsigned char> BlockAirH;
 
 	std::vector<float> FanVelocityX;
 	std::vector<float> FanVelocityY;
@@ -34,32 +37,12 @@ public:
 	std::vector<playerst> stickmen;
 	std::vector<sign> signs;
 
+	uint64_t FrameCount;
+	RNG::State RngState;
+
+	uint32_t Hash() const;
+
 	Json::Value Authors;
 
-	Snapshot() :
-		AirPressure(),
-		AirVelocityX(),
-		AirVelocityY(),
-		AmbientHeat(),
-		Particles(),
-		GravVelocityX(),
-		GravVelocityY(),
-		GravValue(),
-		GravMap(),
-		BlockMap(),
-		ElecMap(),
-		FanVelocityX(),
-		FanVelocityY(),
-		PortalParticles(),
-		WirelessData(),
-		stickmen(),
-		signs()
-	{
-
-	}
-
-	virtual ~Snapshot()
-	{
-
-	}
+	virtual ~Snapshot() = default;
 };

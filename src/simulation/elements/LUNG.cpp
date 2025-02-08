@@ -7,7 +7,7 @@ void Element::Element_LUNG()
 {
 	Identifier = "DEFAULT_PT_LUNG";
 	Name = "LUNG";
-	Colour = PIXPACK(0x990066);
+	Colour = 0x990066_rgb;
 	MenuVisible = 1;
 	MenuSection = SC_BIO;
 	Enabled = 1;
@@ -61,21 +61,22 @@ void Element::Element_LUNG()
 static int update(UPDATE_FUNC_ARGS)
 {
     // O2 use by lung itself
-	Biology::UseO2(200, UPDATE_FUNC_IN);
+	Biology::UseO2(200, UPDATE_FUNC_SUBCALL_ARGS);
 
 	int r, rx, ry;
+	auto &sd = SimulationData::CRef();
 
-    rx =  RNG::Ref().between(-2, 2);
-    ry =  RNG::Ref().between(-2, 2);
+    rx =  sim->rng.between(-2, 2);
+    ry =  sim->rng.between(-2, 2);
 
-    if (BOUNDS_CHECK && (rx || ry))
+    if (rx || ry)
     {
         r = pmap[y+ry][x+rx];
 		int ir = ID(r);
 
         if (r) {
 
-			int targetMaxO2 = sim->elements[parts[i].type].Max_O2;
+			int targetMaxO2 = sd.elements[parts[i].type].Max_O2;
 
 			// Oxygen collection (more efficient than BLD)
 			if (parts[i].bio.o2 < targetMaxO2 && TYP(r) == PT_O2){
@@ -92,7 +93,7 @@ static int update(UPDATE_FUNC_ARGS)
 			}
 			// Blood interactions
 			else if (TYP(r) == PT_BLD || parts[ir].ctype == PT_BLD){
-				int otherMaxO2 = sim->elements[parts[ir].type].Max_O2;
+				int otherMaxO2 = sd.elements[parts[ir].type].Max_O2;
 				// Give oxygen (Unless BLD is full)
 				if (parts[i].bio.o2 > 0 && parts[i].bio.o2 > parts[ir].bio.o2 && parts[ir].bio.o2 < otherMaxO2){
 					// "Cap no fact"
@@ -112,17 +113,17 @@ static int update(UPDATE_FUNC_ARGS)
     }
 
 	// Diffuse resources
-	Biology::DiffuseResources(1, 2, UPDATE_FUNC_IN);
+	Biology::DiffuseResources(1, 2, UPDATE_FUNC_SUBCALL_ARGS);
 	// Radiation damage
-	Biology::DoRadiationDamage(2, 2, UPDATE_FUNC_IN);
+	Biology::DoRadiationDamage(2, 2, UPDATE_FUNC_SUBCALL_ARGS);
 	// Damage from extreme heat or cold
-	Biology::DoHeatDamage(5, 323.15, 273, UPDATE_FUNC_IN);
+	Biology::DoHeatDamage(5, 323.15, 273, UPDATE_FUNC_SUBCALL_ARGS);
 	// Damage from lack of O2 or too much CO2
-	Biology::DoRespirationDamage(100, UPDATE_FUNC_IN);
+	Biology::DoRespirationDamage(100, UPDATE_FUNC_SUBCALL_ARGS);
 	// Heal naturally
-	Biology::DoHealing(100, UPDATE_FUNC_IN);
+	Biology::DoHealing(100, UPDATE_FUNC_SUBCALL_ARGS);
 	// Death check
-	Biology::HandleDeath(UPDATE_FUNC_IN);
+	Biology::HandleDeath(UPDATE_FUNC_SUBCALL_ARGS);
 
 	return 0;
 }
@@ -131,9 +132,6 @@ static int graphics(GRAPHICS_FUNC_ARGS)
 {
     // Oxygen
     int o = cpart->bio.o2;
-
-    // C02
-    int c = cpart->bio.co2;
 	
 	*colr = (int)fmax(7 * o, 100);
 	*colg = 0;

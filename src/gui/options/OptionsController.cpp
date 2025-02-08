@@ -72,19 +72,29 @@ void OptionsController::SetTemperatureScale(int temperatureScale)
 	model->SetTemperatureScale(temperatureScale);
 }
 
+void OptionsController::SetThreadedRendering(bool newThreadedRendering)
+{
+	model->SetThreadedRendering(newThreadedRendering);
+}
+
 void OptionsController::SetFullscreen(bool fullscreen)
 {
 	model->SetFullscreen(fullscreen);
 }
 
-void OptionsController::SetAltFullscreen(bool altFullscreen)
+void OptionsController::SetChangeResolution(bool newChangeResolution)
 {
-	model->SetAltFullscreen(altFullscreen);
+	model->SetChangeResolution(newChangeResolution);
 }
 
 void OptionsController::SetForceIntegerScaling(bool forceIntegerScaling)
 {
 	model->SetForceIntegerScaling(forceIntegerScaling);
+}
+
+void OptionsController::SetBlurryScaling(bool newBlurryScaling)
+{
+	model->SetBlurryScaling(newBlurryScaling);
 }
 
 void OptionsController::SetShowAvatars(bool showAvatars)
@@ -97,6 +107,16 @@ void OptionsController::SetScale(int scale)
 	model->SetScale(scale);
 }
 
+void OptionsController::SetGraveExitsConsole(bool graveExitsConsole)
+{
+	model->SetGraveExitsConsole(graveExitsConsole);
+}
+
+void OptionsController::SetNativeClipoard(bool nativeClipoard)
+{
+	model->SetNativeClipoard(nativeClipoard);
+}
+
 void OptionsController::SetResizable(bool resizable)
 {
 	model->SetResizable(resizable);
@@ -105,6 +125,11 @@ void OptionsController::SetResizable(bool resizable)
 void OptionsController::SetFastQuit(bool fastquit)
 {
 	model->SetFastQuit(fastquit);
+}
+
+void OptionsController::SetGlobalQuit(bool newGlobalQuit)
+{
+	model->SetGlobalQuit(newGlobalQuit);
 }
 
 void OptionsController::SetDecoSpace(int decoSpace)
@@ -137,6 +162,16 @@ void OptionsController::SetMomentumScroll(bool momentumScroll)
 	model->SetMomentumScroll(momentumScroll);
 }
 
+void OptionsController::SetRedirectStd(bool newRedirectStd)
+{
+	model->SetRedirectStd(newRedirectStd);
+}
+
+void OptionsController::SetAutoStartupRequest(bool newAutoStartupRequest)
+{
+	model->SetAutoStartupRequest(newAutoStartupRequest);
+}
+
 void OptionsController::Exit()
 {
 	view->CloseActiveWindow();
@@ -149,8 +184,8 @@ void OptionsController::Exit()
 
 OptionsController::~OptionsController()
 {
-	view->CloseActiveWindow();
 	delete model;
+	view->CloseActiveWindow();
 	delete view;
 }
 

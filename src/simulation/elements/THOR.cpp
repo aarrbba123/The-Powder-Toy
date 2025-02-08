@@ -6,7 +6,7 @@ void Element::Element_THOR()
 {
 	Identifier = "DEFAULT_PT_THOR";
 	Name = "THOR";
-	Colour = PIXPACK(0xff7700);
+	Colour = 0xff7700_rgb;
 	MenuVisible = 1;
 	MenuSection = SC_NUCLEAR;
 	Enabled = 1;
@@ -50,21 +50,19 @@ void Element::Element_THOR()
 static int update(UPDATE_FUNC_ARGS)
 {
 	
-	int r, rx, ry, rt;
+	int r, rx, ry;
 	for (rx = -1; rx < 2; rx++) {
 		for (ry = -1; ry < 2; ry++) {
-			if (BOUNDS_CHECK) {
-				r = sim->photons[y + ry][x + rx];
-				if (!r)
-					continue;
+			r = sim->photons[y + ry][x + rx];
+			if (!r)
+				continue;
 
-				if (TYP(r) == PT_NEUT) {
-					// Remove neutron
-					sim->kill_part(ID(r));
+			if (TYP(r) == PT_NEUT) {
+				// Remove neutron
+				sim->kill_part(ID(r));
 
-					// Heat up
-					parts[i].temp *= 2.0f;
-				}
+				// Heat up
+				parts[i].temp *= 2.0f;
 			}
 		}
 	}

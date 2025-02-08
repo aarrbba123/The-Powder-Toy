@@ -4,7 +4,7 @@ void Element::Element_DT()
 {
 	Identifier = "DEFAULT_PT_DT";
 	Name = "DT";
-	Colour = PIXPACK(0x554040);
+	Colour = 0x554040_rgb;
 	MenuVisible = 1;
 	MenuSection = SC_BIO;
 	Enabled = 1;

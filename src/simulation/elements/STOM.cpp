@@ -7,7 +7,7 @@ void Element::Element_STOM()
 {
 	Identifier = "DEFAULT_PT_STOM";
 	Name = "STOM";
-	Colour = PIXPACK(0x990055);
+	Colour = 0x990055_rgb;
 	MenuVisible = 1;
 	MenuSection = SC_BIO;
 	Enabled = 1;
@@ -63,29 +63,29 @@ void Element::Element_STOM()
 static int update(UPDATE_FUNC_ARGS)
 {
 	// O2 use by cells
-	Biology::UseO2(100, UPDATE_FUNC_IN);
+	Biology::UseO2(100, UPDATE_FUNC_SUBCALL_ARGS);
 	// Diffuse resources
-	Biology::DiffuseResources(2, 2, UPDATE_FUNC_IN);
+	Biology::DiffuseResources(2, 2, UPDATE_FUNC_SUBCALL_ARGS);
 	// Radiation damage
-	Biology::DoRadiationDamage(2, 2, UPDATE_FUNC_IN);
+	Biology::DoRadiationDamage(2, 2, UPDATE_FUNC_SUBCALL_ARGS);
 	// Damage from extreme heat or cold
-	Biology::DoHeatDamage(5, 323.15, 273, UPDATE_FUNC_IN);
+	Biology::DoHeatDamage(5, 323.15, 273, UPDATE_FUNC_SUBCALL_ARGS);
 	// Damage from lack of O2 or too much CO2
-	Biology::DoRespirationDamage(100, UPDATE_FUNC_IN);
+	Biology::DoRespirationDamage(100, UPDATE_FUNC_SUBCALL_ARGS);
 	// Heal naturally
-	Biology::DoHealing(100, UPDATE_FUNC_IN);
+	Biology::DoHealing(100, UPDATE_FUNC_SUBCALL_ARGS);
 	// Death check
-	Biology::HandleDeath(UPDATE_FUNC_IN);
+	Biology::HandleDeath(UPDATE_FUNC_SUBCALL_ARGS);
 
     if (parts[i].bio.glucose > 2 && parts[i].bio.o2 > 5 && parts[i].bio.health > 75) {
 
         // Needs to be somewhat healthy to generate acid
-        if (RNG::Ref().chance(1, 100)){
+        if (sim->rng.chance(1, 100)){
             // Generate stomach acid
-            int rand_x =  RNG::Ref().between(-1, 1);
-            int rand_y =  RNG::Ref().between(-1, 1);
+            int rand_x =  sim->rng.between(-1, 1);
+            int rand_y =  sim->rng.between(-1, 1);
 
-            if (BOUNDS_CHECK && (rand_x || rand_y)){ 
+            if (rand_x || rand_y){ 
 
                 int pos = pmap[y + rand_y][x + rand_x];
                 int t = TYP(pos);
@@ -95,7 +95,7 @@ static int update(UPDATE_FUNC_ARGS)
                 }
             }
             // SQUEEZE the food
-            sim->pv[y/CELL][x/CELL] = RNG::Ref().between(-5, 5);
+            sim->pv[y/CELL][x/CELL] = sim->rng.between(-5, 5);
         }
     }
 
@@ -107,9 +107,6 @@ static int graphics(GRAPHICS_FUNC_ARGS)
 {
     // Oxygen
     int o = cpart->bio.o2;
-
-    // C02
-    int c = cpart->bio.co2;
 
 	*colr = (int)fmin(170, fmax(3 * o, 100));
 	*colg = 0;

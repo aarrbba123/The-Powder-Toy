@@ -1,13 +1,13 @@
 #include "simulation/ElementCommon.h"
 
 static int update(UPDATE_FUNC_ARGS);
-static int graphics(GRAPHICS_FUNC_ARGS);
+// static int graphics(GRAPHICS_FUNC_ARGS);
 
 void Element::Element_SACID()
 {
 	Identifier = "DEFAULT_PT_SACID";
 	Name = "SACID";
-	Colour = PIXPACK(0x33FF66);
+	Colour = 0x33FF66_rgb;
 	MenuVisible = 1;
 	MenuSection = SC_BIO;
 	Enabled = 1;
@@ -49,17 +49,18 @@ void Element::Element_SACID()
 
 static int update(UPDATE_FUNC_ARGS)
 {
-    int rx =  RNG::Ref().between(-1, 1);
-	int ry =  RNG::Ref().between(-1, 1);
+    int rx =  sim->rng.between(-1, 1);
+	int ry =  sim->rng.between(-1, 1);
+	auto &sd = SimulationData::CRef();
 
-    if (BOUNDS_CHECK && (rx || ry))
+    if (rx || ry)
     {
         int r = pmap[y+ry][x+rx];
         if (!r)
             return 0;
 
         int type = TYP(r);
-        Element re = sim->elements[type];
+        Element re = sd.elements[type];
 
         if (type == PT_STOM || type == PT_SACID || type == PT_MUCO || type == PT_SVLV)
         {

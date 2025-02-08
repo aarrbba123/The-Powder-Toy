@@ -4,7 +4,7 @@ void Element::Element_DIGE()
 {
 	Identifier = "DEFAULT_PT_DIGE";
 	Name = "DIGE";
-	Colour = PIXPACK(0x554080);
+	Colour = 0x554080_rgb;
 	MenuVisible = 1;
 	MenuSection = SC_BIO;
 	Enabled = 1;

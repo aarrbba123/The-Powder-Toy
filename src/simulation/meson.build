@@ -1,22 +1,30 @@
 simulation_files = files(
 	'Air.cpp',
+	'AccessProperty.cpp',
 	'Element.cpp',
 	'ElementClasses.cpp',
 	'GOLString.cpp',
-	'Gravity.cpp',
 	'Particle.cpp',
 	'SaveRenderer.cpp',
 	'Sign.cpp',
-	'SimTool.cpp',
 	'SimulationData.cpp',
-	'ToolClasses.cpp',
 	'Simulation.cpp',
 	'Biology.cpp',
-	'SnapshotDelta.cpp',
+	'StructProperty.cpp',
 )
 
 subdir('elements')
 subdir('simtools')
+subdir('gravity')
 
 powder_files += simulation_files
 render_files += simulation_files
+
+powder_files += files(
+	'AccessPropertyParse.cpp',
+	'Editing.cpp',
+	'SimTool.cpp',
+	'ToolClasses.cpp',
+	'Snapshot.cpp',
+	'SnapshotDelta.cpp',
+)

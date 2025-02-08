@@ -7,7 +7,7 @@ void Element::Element_SKIND()
 {
 	Identifier = "DEFAULT_PT_SKIND";
 	Name = "SKIND";
-	Colour = PIXPACK(0xE89BBC);
+	Colour = 0xE89BBC_rgb;
 	MenuVisible = 1;
 	MenuSection = SC_BIO;
 	Enabled = 1;
@@ -62,20 +62,20 @@ void Element::Element_SKIND()
 static int update(UPDATE_FUNC_ARGS)
 {
 	// O2 use itself
-    Biology::UseO2(150, UPDATE_FUNC_IN);
+    Biology::UseO2(150, UPDATE_FUNC_SUBCALL_ARGS);
     // Diffuse resources
-	Biology::DiffuseResources(2, 2, UPDATE_FUNC_IN);
+	Biology::DiffuseResources(2, 2, UPDATE_FUNC_SUBCALL_ARGS);
 
 	int rx, ry, r;
 
-	rx =  RNG::Ref().between(-2, 2);
-    ry =  RNG::Ref().between(-2, 2);
+	rx =  sim->rng.between(-2, 2);
+    ry =  sim->rng.between(-2, 2);
 
     // Ensure sufficient material for growth
     if (parts[i].bio.o2 > 10){
         // Growth check
         
-        if (BOUNDS_CHECK && (rx || ry))
+        if (rx || ry)
         {
             bool f_skins = 0;
 
@@ -94,8 +94,8 @@ static int update(UPDATE_FUNC_ARGS)
                             f_skins = true;
 
                             // Try to grow in one random surrounding spot
-                            int rrx = RNG::Ref().between(-2, 2);
-                            int rry = RNG::Ref().between(-2, 2);
+                            int rrx = sim->rng.between(-2, 2);
+                            int rry = sim->rng.between(-2, 2);
 
                             int rr = pmap[y+rry][x+rrx];
                             if (!rr){
@@ -115,26 +115,27 @@ static int update(UPDATE_FUNC_ARGS)
     }
 
     // Radiation damage
-	Biology::DoRadiationDamage(2, 2, UPDATE_FUNC_IN);
+	Biology::DoRadiationDamage(2, 2, UPDATE_FUNC_SUBCALL_ARGS);
 	// Damage from extreme heat or cold
 	// Skin is a bit more resilient against temperature
-	Biology::DoHeatDamage(15, 323.15, 273, UPDATE_FUNC_IN);
+	Biology::DoHeatDamage(15, 323.15, 273, UPDATE_FUNC_SUBCALL_ARGS);
 	// Damage from lack of O2 or too much CO2
-	Biology::DoRespirationDamage(100, UPDATE_FUNC_IN);
+	Biology::DoRespirationDamage(100, UPDATE_FUNC_SUBCALL_ARGS);
 	// Heal naturally
-	Biology::DoHealing(100, UPDATE_FUNC_IN);
+	Biology::DoHealing(100, UPDATE_FUNC_SUBCALL_ARGS);
 	// Death check
-	Biology::HandleDeath(UPDATE_FUNC_IN);
+	Biology::HandleDeath(UPDATE_FUNC_SUBCALL_ARGS);
 
     return 0;
 }
 
 static int graphics(GRAPHICS_FUNC_ARGS)
 {
-	// Life mix
-	*colr = int(*colr * (cpart->bio.health) / 100.0f);
-	*colg = int(*colg * (cpart->bio.health) / 100.0f);
-	*colb = int(*colb * (cpart->bio.health) / 100.0f);
+
+	// Life mix + Base colour
+	*colr = int(232 * (cpart->bio.health) / 150.0f);
+	*colg = int(155 * (cpart->bio.health) / 150.0f);
+	*colb = int(188 * (cpart->bio.health) / 150.0f);
 
 	return 0;
 }

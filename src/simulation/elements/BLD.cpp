@@ -7,7 +7,7 @@ void Element::Element_BLD()
 {
 	Identifier = "DEFAULT_PT_BLD";
 	Name = "BLD";
-	Colour = PIXPACK(0x990000);
+	Colour = 0x990000_rgb;
 	MenuVisible = 1;
 	MenuSection = SC_BIO;
 	Enabled = 1;
@@ -62,33 +62,33 @@ static int update(UPDATE_FUNC_ARGS)
 {
 
     // O2 use by blood itself (made very slow for somewhat accuracy)
-    Biology::UseO2(1000, UPDATE_FUNC_IN);
+    Biology::UseO2(1000, UPDATE_FUNC_SUBCALL_ARGS);
 	// Try to collect O2
-	if (Biology::TryCollect(2, 1, PT_O2, UPDATE_FUNC_IN)){
+	if (Biology::TryCollect(2, 1, PT_O2, UPDATE_FUNC_SUBCALL_ARGS)){
 		parts[i].bio.o2 += 5;
 	}
 	// Try to collect glucose
-	if (Biology::TryCollect(2, 1, PT_GLUC, UPDATE_FUNC_IN)){
+	if (Biology::TryCollect(2, 1, PT_GLUC, UPDATE_FUNC_SUBCALL_ARGS)){
 		parts[i].bio.glucose += 1000;
 	}
 	// Diffuse resources
-	Biology::DiffuseResources(1, 2, UPDATE_FUNC_IN);
+	Biology::DiffuseResources(1, 2, UPDATE_FUNC_SUBCALL_ARGS);
 	// Radiation damage
-	Biology::DoRadiationDamage(2, 2, UPDATE_FUNC_IN);
+	Biology::DoRadiationDamage(2, 2, UPDATE_FUNC_SUBCALL_ARGS);
 	// Damage from extreme heat or cold
-	Biology::DoHeatDamage(5, 323.15, 273, UPDATE_FUNC_IN);
+	Biology::DoHeatDamage(5, 323.15, 273, UPDATE_FUNC_SUBCALL_ARGS);
 	// Damage from lack of O2 or too much CO2
-	Biology::DoRespirationDamage(100, UPDATE_FUNC_IN);
+	Biology::DoRespirationDamage(100, UPDATE_FUNC_SUBCALL_ARGS);
 	// Heal naturally
-	Biology::DoHealing(100, UPDATE_FUNC_IN);
+	Biology::DoHealing(100, UPDATE_FUNC_SUBCALL_ARGS);
 	// Death check
-	Biology::HandleDeath(UPDATE_FUNC_IN);
+	Biology::HandleDeath(UPDATE_FUNC_SUBCALL_ARGS);
 
 
-	int rand_x =  RNG::Ref().between(-2, 2);
-	int rand_y =  RNG::Ref().between(-2, 2);
+	int rand_x =  sim->rng.between(-2, 2);
+	int rand_y =  sim->rng.between(-2, 2);
 
-	if (BOUNDS_CHECK && (rand_x || rand_y)){ 
+	if (rand_x || rand_y){ 
 
 		int pos = pmap[y + rand_y][x + rand_x];
 		int target = ID(pos);
@@ -96,9 +96,10 @@ static int update(UPDATE_FUNC_ARGS)
 
 		//Metastasis code
 		if (parts[i].ctype == PT_TUMOR){
-			if (RNG::Ref().chance(1, 100)){
+			if (sim->rng.chance(1, 100)){
 			// convert biology to tumor (grow)
-				if (sim->elements[target_type].Properties & TYPE_BIO && target_type != PT_TUMOR){
+				auto &sd = SimulationData::CRef();
+				if (sd.elements[target_type].Properties & TYPE_BIO && target_type != PT_TUMOR){
 					sim->part_change_type(target, x + rand_x, y + rand_y, PT_TUMOR);
 				}
 			}
@@ -116,7 +117,6 @@ static int graphics(GRAPHICS_FUNC_ARGS)
     // C02
     int c = cpart->bio.co2 / 3;
 
-	int q = cpart->bio.o2;
 	*colr = (int)fmax(3 * o, 75);
 	*colg = 0;
 	*colb = 8 * c;

@@ -4,7 +4,7 @@ void Element::Element_SAWD()
 {
 	Identifier = "DEFAULT_PT_SAWD";
 	Name = "SAWD";
-	Colour = PIXPACK(0xF0F0A0);
+	Colour = 0xF0F0A0_rgb;
 	MenuVisible = 1;
 	MenuSection = SC_POWDERS;
 	Enabled = 1;
@@ -40,5 +40,5 @@ void Element::Element_SAWD()
 	HighTemperature = ITH;
 	HighTemperatureTransition = NT;
 
-	Graphics = NULL; // is this needed?
+	Graphics = nullptr; // is this needed?
 }

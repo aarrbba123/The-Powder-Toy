@@ -1,7 +1,4 @@
-#ifndef OPTIONSMODEL_H_
-#define OPTIONSMODEL_H_
-#include "Config.h"
-
+#pragma once
 #include <vector>
 
 class GameModel;
@@ -34,6 +31,8 @@ public:
 	void SetEdgeMode(int edgeMode);
 	int GetTemperatureScale();
 	void SetTemperatureScale(int temperatureScale);
+	int GetThreadedRendering();
+	void SetThreadedRendering(bool newThreadedRendering);
 	int GetGravityMode();
 	void SetGravityMode(int gravityMode);
 	float GetCustomGravityX();
@@ -42,16 +41,24 @@ public:
 	void SetCustomGravityY(float y);
 	int GetScale();
 	void SetScale(int scale);
+	bool GetGraveExitsConsole();
+	void SetGraveExitsConsole(bool graveExitsConsole);
+	bool GetNativeClipoard();
+	void SetNativeClipoard(bool nativeClipoard);
 	bool GetResizable();
 	void SetResizable(bool resizable);
 	bool GetFullscreen();
 	void SetFullscreen(bool fullscreen);
-	bool GetAltFullscreen();
-	void SetAltFullscreen(bool oldFullscreen);
+	bool GetChangeResolution();
+	void SetChangeResolution(bool newChangeResolution);
 	bool GetForceIntegerScaling();
 	void SetForceIntegerScaling(bool forceIntegerScaling);
+	bool GetBlurryScaling();
+	void SetBlurryScaling(bool newBlurryScaling);
 	bool GetFastQuit();
 	void SetFastQuit(bool fastquit);
+	bool GetGlobalQuit();
+	void SetGlobalQuit(bool newGlobalQuit);
 	int GetDecoSpace();
 	void SetDecoSpace(int decoSpace);
 	bool GetMouseClickRequired();
@@ -62,7 +69,9 @@ public:
 	void SetPerfectCircle(bool perfectCircle);
 	bool GetMomentumScroll();
 	void SetMomentumScroll(bool momentumScroll);
+	bool GetRedirectStd();
+	void SetRedirectStd(bool newRedirectStd);
+	bool GetAutoStartupRequest();
+	void SetAutoStartupRequest(bool newAutoStartupRequest);
 	virtual ~OptionsModel();
 };
-
-#endif /* OPTIONSMODEL_H_ */

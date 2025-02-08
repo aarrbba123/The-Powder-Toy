@@ -6,7 +6,7 @@ void Element::Element_NIH()
 {
 	Identifier = "DEFAULT_PT_NIH";
 	Name = "NIH";
-	Colour = PIXPACK(0xc94a0a);
+	Colour = 0xc94a0a_rgb;
 	MenuVisible = 1;
 	MenuSection = SC_NUCLEAR;
 	Enabled = 1;
@@ -51,7 +51,7 @@ static int update(UPDATE_FUNC_ARGS)
 {
 	parts[i].temp *= 1.1f;
 
-	if (RNG::Ref().chance(1, 100) && RNG::Ref().chance(int(5.0f * sim->pv[y / CELL][x / CELL]), 100))
+	if (sim->rng.chance(1, 100) && sim->rng.chance(int(5.0f * sim->pv[y / CELL][x / CELL]), 100))
 	{
 		sim->create_part(i, x, y, PT_NEUT);
 		sim->create_part(i, x + 1, y, PT_NEUT);

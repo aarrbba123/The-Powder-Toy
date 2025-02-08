@@ -7,7 +7,7 @@ void Element::Element_WBLD()
 {
 	Identifier = "DEFAULT_PT_WBLD";
 	Name = "WBLD";
-	Colour = PIXPACK(0xFFFFFF);
+	Colour = 0xFFFFFF_rgb;
 	MenuVisible = 1;
 	MenuSection = SC_BIO;
 	Enabled = 1;
@@ -60,21 +60,20 @@ void Element::Element_WBLD()
 
 static int update(UPDATE_FUNC_ARGS)
 {
-
-
 	// O2 use
-	Biology::UseO2(100, UPDATE_FUNC_IN);
+	Biology::UseO2(100, UPDATE_FUNC_SUBCALL_ARGS);
 
 	int r, rx, ry;
 
-	int iMaxO2 = sim->elements[parts[i].type].Max_O2;
+	auto &sd = SimulationData::CRef();
+	int iMaxO2 = sd.elements[parts[i].type].Max_O2;
 
 	// Fight disease
-	if (Biology::AttackDisease(1, 2, 50, UPDATE_FUNC_IN)){
+	if (Biology::AttackDisease(1, 2, 50, UPDATE_FUNC_SUBCALL_ARGS)){
 		// If there was disease, multiply 
-		if (RNG::Ref().chance(1, 100)){
-			rx =  RNG::Ref().between(-2, 2);
-			ry =  RNG::Ref().between(-2, 2);
+		if (sim->rng.chance(1, 100)){
+			rx =  sim->rng.between(-2, 2);
+			ry =  sim->rng.between(-2, 2);
 
 			r = pmap[y+ry][x+rx];
 
@@ -99,10 +98,10 @@ static int update(UPDATE_FUNC_ARGS)
 		}
 	}
 
-    rx =  RNG::Ref().between(-4, 4);
-    ry =  RNG::Ref().between(-4, 4);
+    rx =  sim->rng.between(-4, 4);
+    ry =  sim->rng.between(-4, 4);
     
-    if (BOUNDS_CHECK && (rx || ry))
+    if (rx || ry)
     {
         r = pmap[y+ry][x+rx];
 
@@ -128,15 +127,15 @@ static int update(UPDATE_FUNC_ARGS)
     }
 
 	// Radiation damage
-	Biology::DoRadiationDamage(2, 2, UPDATE_FUNC_IN);
+	Biology::DoRadiationDamage(2, 2, UPDATE_FUNC_SUBCALL_ARGS);
 	// Damage from extreme heat or cold
-	Biology::DoHeatDamage(5, 323.15, 273, UPDATE_FUNC_IN);
+	Biology::DoHeatDamage(5, 323.15, 273, UPDATE_FUNC_SUBCALL_ARGS);
 	// Damage from lack of O2 or too much CO2
-	Biology::DoRespirationDamage(100, UPDATE_FUNC_IN);
+	Biology::DoRespirationDamage(100, UPDATE_FUNC_SUBCALL_ARGS);
 	// Heal naturally
-	Biology::DoHealing(100, UPDATE_FUNC_IN);
+	Biology::DoHealing(100, UPDATE_FUNC_SUBCALL_ARGS);
 	// Death check
-	Biology::HandleDeath(UPDATE_FUNC_IN);
+	Biology::HandleDeath(UPDATE_FUNC_SUBCALL_ARGS);
 
 	return 0;
 }

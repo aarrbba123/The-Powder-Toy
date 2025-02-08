@@ -7,7 +7,7 @@ void Element::Element_NEUR()
 {
 	Identifier = "DEFAULT_PT_NEUR";
 	Name = "NEUR";
-	Colour = PIXPACK(0xCF95B8);
+	Colour = 0xCF95B8_rgb;
 	MenuVisible = 1;
 	MenuSection = SC_BIO;
 	Enabled = 1;
@@ -62,30 +62,30 @@ void Element::Element_NEUR()
 static int update(UPDATE_FUNC_ARGS)
 {
 
-    int r, nnx, nny, rx, ry;
+    int r, rx, ry;
 
 	// NOTE: Neurons are fast to die and slow to heal
 
     // O2 use itself
-    Biology::UseO2(150, UPDATE_FUNC_IN);
+    Biology::UseO2(150, UPDATE_FUNC_SUBCALL_ARGS);
     // Diffuse resources
-	Biology::DiffuseResources(2, 2, UPDATE_FUNC_IN);
+	Biology::DiffuseResources(2, 2, UPDATE_FUNC_SUBCALL_ARGS);
     // Radiation damage
-	Biology::DoRadiationDamage(2, 2, UPDATE_FUNC_IN);
+	Biology::DoRadiationDamage(2, 2, UPDATE_FUNC_SUBCALL_ARGS);
 	// Damage from extreme heat or cold
-	Biology::DoHeatDamage(5, 323.15, 273, UPDATE_FUNC_IN);
+	Biology::DoHeatDamage(5, 323.15, 273, UPDATE_FUNC_SUBCALL_ARGS);
 	// Damage from lack of O2 or too much CO2
-	Biology::DoRespirationDamage(50, UPDATE_FUNC_IN);
+	Biology::DoRespirationDamage(50, UPDATE_FUNC_SUBCALL_ARGS);
 	// Heal naturally
-	Biology::DoHealing(200, UPDATE_FUNC_IN);
+	Biology::DoHealing(200, UPDATE_FUNC_SUBCALL_ARGS);
 	// Death check
-	Biology::HandleDeath(UPDATE_FUNC_IN);
+	Biology::HandleDeath(UPDATE_FUNC_SUBCALL_ARGS);
 
     // Emit signals
-    if (RNG::Ref().chance(parts[i].bio.health, 5000)){
+    if (sim->rng.chance(parts[i].bio.health, 5000)){
         for (rx=-1; rx<2; rx++)
             for (ry=-1; ry<2; ry++)
-                if (BOUNDS_CHECK && (rx || ry) && abs(rx)+abs(ry)<4)
+                if ((rx || ry) && abs(rx)+abs(ry)<4)
                 {
                     r = pmap[y+ry][x+rx];
                     if (!r)
@@ -93,7 +93,8 @@ static int update(UPDATE_FUNC_ARGS)
                     int rt = TYP(r);
                     if (sim->parts_avg(i,ID(r),PT_INSL) != PT_INSL)
                     {
-                        if ((sim->elements[rt].Properties&PROP_CONDUCTS) && parts[ID(r)].life==0)
+						auto &sd = SimulationData::CRef();
+                        if ((sd.elements[rt].Properties&PROP_CONDUCTS) && parts[ID(r)].life==0)
                         {
                             parts[ID(r)].life = 4;
                             parts[ID(r)].ctype = rt;

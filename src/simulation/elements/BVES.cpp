@@ -1,10 +1,12 @@
 #include "simulation/ElementCommon.h"
+#include "PIPE.h"
 //Temp particle used for graphics
 Particle btpart;
 
 int Element_BVES_update(UPDATE_FUNC_ARGS);
 int Element_BVES_graphics(GRAPHICS_FUNC_ARGS);
 void Element_BVES_transfer_bves_to_part(Simulation * sim, Particle *bves, Particle *part, bool STOR);
+static void props_bves_to_part(const Particle *bves, Particle *part, bool STOR);
 static void transfer_part_to_bves(Particle *part, Particle *bves);
 static void transfer_bves_to_bves(Particle *src, Particle *dest, bool STOR);
 static void pushParticle(Simulation * sim, int i, int count, int original);
@@ -14,7 +16,7 @@ void Element::Element_BVES()
 {
 	Identifier = "DEFAULT_PT_BVES";
 	Name = "BVES";
-	Colour = PIXPACK(0x400000);
+	Colour = 0x400000_rgb;
 	MenuVisible = 1;
 	MenuSection = SC_BIO;
 	Enabled = 1;
@@ -121,12 +123,18 @@ static unsigned int nextColor(unsigned int flags)
 
 int Element_BVES_update(UPDATE_FUNC_ARGS)
 {
+	// Oh dear, speghetti code, f u n.
+	// PIPE code's clean, though.
+
+	auto &sd = SimulationData::CRef();
+	auto &elements = sd.elements;
+
 	int r, rx, ry, np;
 	int rnd, rndstore;
 
     /*
     // O2 use
-    if (RNG::Ref().chance(1, 300)){
+    if (sim->rng.chance(1, 300)){
 
 		if (parts[i].pavg[0] > 0){
         	parts[i].pavg[0] -= 1;
@@ -142,11 +150,11 @@ int Element_BVES_update(UPDATE_FUNC_ARGS)
         }
     }
 
-    rx =  RNG::Ref().between(-2, 2);
-    ry =  RNG::Ref().between(-2, 2);
+    rx =  sim->rng.between(-2, 2);
+    ry =  sim->rng.between(-2, 2);
 
     // Diffuse among biological
-    if (BOUNDS_CHECK && (rx || ry))
+    if (rx || ry)
     {
         r = pmap[y+ry][x+rx];
         int ir = ID(r);
@@ -166,7 +174,7 @@ int Element_BVES_update(UPDATE_FUNC_ARGS)
     }
     
 
-    if (RNG::Ref().chance(1, 50)){
+    if (sim->rng.chance(1, 50)){
         // Health stuff
         if (parts[i].tmp5 > 0 && parts[i].pavg[0] < 1){
             parts[i].tmp5 -= 1;
@@ -183,14 +191,14 @@ int Element_BVES_update(UPDATE_FUNC_ARGS)
     }
     */
 
-   if (parts[i].ctype == PT_BLD ||  parts[i].ctype == PT_NONE){
+   if (parts[i].ctype == PT_BLD || parts[i].ctype == PT_NONE){
 
-	   if (RNG::Ref().chance(1, 20)){
+	   if (sim->rng.chance(1, 20)){
 
-			rx =  RNG::Ref().between(-2, 2);
-			ry =  RNG::Ref().between(-2, 2);
+			rx =  sim->rng.between(-2, 2);
+			ry =  sim->rng.between(-2, 2);
 			
-			if (BOUNDS_CHECK && (rx || ry))
+			if (rx || ry)
 			{
 				r = pmap[y+ry][x+rx];
 				if (r){
@@ -198,24 +206,24 @@ int Element_BVES_update(UPDATE_FUNC_ARGS)
 					int tr = TYP(r);
 					int ir = ID(r);
 
-					if (sim->elements[tr].Properties & TYPE_BIO && tr != PT_BVES){
+					if (elements[tr].Properties & TYPE_BIO && tr != PT_BVES){
 
 
-						int irMaxO2 = sim->elements[parts[ir].type].Max_O2;
+						int irMaxO2 = elements[parts[ir].type].Max_O2;
 
 						if (parts[i].bio.o2 > 0 && parts[ir].bio.o2 < irMaxO2){
 							parts[i].bio.o2--;
 							parts[ir].bio.o2++;
 						}
 
-						int iMaxCO2 = sim->elements[parts[i].type].Max_CO2;
+						int iMaxCO2 = elements[parts[i].type].Max_CO2;
 
 						if (parts[i].bio.co2 < iMaxCO2 && parts[ir].bio.co2 > 0){
 							parts[i].bio.co2++;
 							parts[ir].bio.co2--;
 						}
 					}
-					else if (sim->elements[tr].Properties & TYPE_BIO){
+					else if (elements[tr].Properties & TYPE_BIO){
 						if (parts[i].bio.o2 > parts[ir].bio.o2){
 							parts[i].bio.o2--;
 							parts[ir].bio.o2++;
@@ -235,7 +243,7 @@ int Element_BVES_update(UPDATE_FUNC_ARGS)
        //sim->part_change_type(i, x, y, PT_DT);
    //}
 
-	if (parts[i].ctype && !sim->elements[TYP(parts[i].ctype)].Enabled)
+	if (parts[i].ctype && !elements[TYP(parts[i].ctype)].Enabled)
 		parts[i].ctype = 0;
 	if (parts[i].tmp & PPIP_TMPFLAG_TRIGGERS)
 	{
@@ -258,7 +266,7 @@ int Element_BVES_update(UPDATE_FUNC_ARGS)
 			for (rx=-2; rx<3; rx++)
 				for (ry=-2; ry<3; ry++)
 				{
-					if (BOUNDS_CHECK && (rx || ry))
+					if (rx || ry)
 					{
 						r = pmap[y+ry][x+rx];
 						if (TYP(r) == PT_BRCK)
@@ -300,7 +308,7 @@ int Element_BVES_update(UPDATE_FUNC_ARGS)
 			// make automatic bves pattern
 			for (rx=-1; rx<2; rx++)
 				for (ry=-1; ry<2; ry++)
-					if (BOUNDS_CHECK && (rx || ry))
+					if (rx || ry)
 					{
 						count++;
 						r = pmap[y+ry][x+rx];
@@ -352,12 +360,12 @@ int Element_BVES_update(UPDATE_FUNC_ARGS)
 
 			if (nt)//there is something besides BVES around current particle
 			{
-				rndstore = RNG::Ref().gen();
+				rndstore = sim->rng.gen();
 				rnd = rndstore&7;
 				//rndstore = rndstore>>3;
 				rx = bpos_1_rx[rnd];
 				ry = bpos_1_ry[rnd];
-				if (BOUNDS_CHECK)
+				if (true)
 				{
 					r = pmap[y+ry][x+rx];
 					if(!r)
@@ -371,14 +379,14 @@ int Element_BVES_update(UPDATE_FUNC_ARGS)
 						}
 					}
 					//try eating particle at entrance
-					else if (!TYP(parts[i].ctype) && (sim->elements[TYP(r)].Properties & (TYPE_PART | TYPE_LIQUID | TYPE_GAS | TYPE_ENERGY)))
+					else if (!TYP(parts[i].ctype) && (elements[TYP(r)].Properties & (TYPE_PART | TYPE_LIQUID | TYPE_GAS | TYPE_ENERGY)))
 					{
 						if (TYP(r)==PT_SOAP)
 							Element_SOAP_detach(sim, ID(r));
 						transfer_part_to_bves(parts+(ID(r)), parts+i);
 						sim->kill_part(ID(r));
 					}
-					else if (!TYP(parts[i].ctype) && TYP(r)==PT_STOR && sim->IsElement(parts[ID(r)].tmp) && (sim->elements[parts[ID(r)].tmp].Properties & (TYPE_PART | TYPE_LIQUID | TYPE_GAS | TYPE_ENERGY)))
+					else if (!TYP(parts[i].ctype) && TYP(r)==PT_STOR && sd.IsElement(parts[ID(r)].tmp) && (elements[parts[ID(r)].tmp].Properties & (TYPE_PART | TYPE_LIQUID | TYPE_GAS | TYPE_ENERGY)))
 					{
 						// STOR stores properties in the same places as BVES does
 						transfer_bves_to_bves(parts+(ID(r)), parts+i, true);
@@ -394,13 +402,13 @@ int Element_BVES_update(UPDATE_FUNC_ARGS)
 		for (rx=-2; rx<3; rx++)
 			for (ry=-2; ry<3; ry++)
 			{
-				if (BOUNDS_CHECK && (rx || ry))
+				if (rx || ry)
 				{
 					r = pmap[y+ry][x+rx];
 					if (!r)
 					{
 						// BRCK border
-						int index = sim->create_part(-1,x+rx,y+ry,PT_MEAT);
+						sim->create_part(-1,x+rx,y+ry,PT_MEAT);
 					}
 				}
 			}
@@ -414,7 +422,7 @@ int Element_BVES_update(UPDATE_FUNC_ARGS)
 		{
 			for (rx=-1; rx<2; rx++)
 				for (ry=-1; ry<2; ry++)
-					if (BOUNDS_CHECK && (rx || ry))
+					if (rx || ry)
 					{
 						if (!pmap[y+ry][x+rx] && sim->bmap[(y+ry)/CELL][(x+rx)/CELL]!=WL_ALLOWAIR && sim->bmap[(y+ry)/CELL][(x+rx)/CELL]!=WL_WALL && sim->bmap[(y+ry)/CELL][(x+rx)/CELL]!=WL_WALLELEC && (sim->bmap[(y+ry)/CELL][(x+rx)/CELL]!=WL_EWALL || sim->emap[(y+ry)/CELL][(x+rx)/CELL]))
 							parts[i].life=50;
@@ -425,7 +433,7 @@ int Element_BVES_update(UPDATE_FUNC_ARGS)
 			int issingle = 1;
 			for (rx=-1; rx<2; rx++)
 				for (ry=-1; ry<2; ry++)
-					if (BOUNDS_CHECK && (rx || ry))
+					if (rx || ry)
 					{
 						r = pmap[y+ry][x+rx];
 						if ((TYP(r)==PT_BVES || TYP(r) == PT_PPIP) && parts[i].life)
@@ -447,50 +455,63 @@ int Element_BVES_update(UPDATE_FUNC_ARGS)
 
 int Element_BVES_graphics(GRAPHICS_FUNC_ARGS)
 {
+	auto &sd = SimulationData::CRef();
+	auto &elements = sd.elements;
+	auto &graphicscache = sd.graphicscache;
 	int t = TYP(cpart->ctype);
-	if (t>0 && t<PT_NUM && ren->sim->elements[t].Enabled)
+	if (t>0 && t<PT_NUM && elements[t].Enabled)
 	{
 		if (t == PT_STKM || t == PT_STKM2 || t == PT_FIGH)
 			return 0;
-		if (ren->graphicscache[t].isready)
+		if (graphicscache[t].isready)
 		{
-			*pixel_mode = ren->graphicscache[t].pixel_mode;
-			*cola = ren->graphicscache[t].cola;
-			*colr = ren->graphicscache[t].colr;
-			*colg = ren->graphicscache[t].colg;
-			*colb = ren->graphicscache[t].colb;
-			*firea = ren->graphicscache[t].firea;
-			*firer = ren->graphicscache[t].firer;
-			*fireg = ren->graphicscache[t].fireg;
-			*fireb = ren->graphicscache[t].fireb;
+			*pixel_mode = graphicscache[t].pixel_mode;
+			*cola = graphicscache[t].cola;
+			*colr = graphicscache[t].colr;
+			*colg = graphicscache[t].colg;
+			*colb = graphicscache[t].colb;
+			*firea = graphicscache[t].firea;
+			*firer = graphicscache[t].firer;
+			*fireg = graphicscache[t].fireg;
+			*fireb = graphicscache[t].fireb;
 		}
 		else
 		{
-			// Temp particle used for graphics.
-			Particle tpart = *cpart;
+			// We emulate the graphics of the stored particle. We need a const Particle *cpart to pass to the graphics function,
+			// but we don't have a Particle that is populated the way the graphics function expects, so we construct a temporary
+			// one and present that to it.
+			//
+			// Native graphics functions are well-behaved and use the cpart we give them, no questions asked, so we can just have
+			// the Particle on stack. Swapping the pointers in cpart with tpart takes care of passing the particle on stack to the
+			// native graphics function. Lua graphics functions are more complicated to appease: they access particle data through the
+			// particle ID, so not only do we have to give them a correctly populated Particle, it also has to be somewhere in Simulation.
+			// luaGraphicsWrapper takes care of this.
+			// ...and yes, I did copy the whole explaination. Don't ask.
 
-			// Emulate the graphics of stored particle.
-			memset(cpart, 0, sizeof(Particle));
-			cpart->type = t;
-			cpart->temp = tpart.temp;
-			cpart->life = tpart.tmp2;
-			cpart->tmp = tpart.tmp3;
-			cpart->ctype = tpart.tmp4;
+			RGB colour = elements[t].Colour; // Never in my life I had seen colour/color spelled with a u in programming, until now.
+			*colr = colour.Red;
+			*colg = colour.Green;
+			*colb = colour.Blue;
+			auto *graphics = elements[t].Graphics;
 
-			*colr = PIXR(ren->sim->elements[t].Colour);
-			*colg = PIXG(ren->sim->elements[t].Colour);
-			*colb = PIXB(ren->sim->elements[t].Colour);
-			if (ren->sim->elements[t].Graphics)
+			if (graphics)
 			{
-				(*(ren->sim->elements[t].Graphics))(ren, cpart, nx, ny, pixel_mode, cola, colr, colg, colb, firea, firer, fireg, fireb);
+				Particle tpart{};
+				props_bves_to_part(cpart, &tpart, false);
+				auto *prevPipeSubcallCpart = gfctx.pipeSubcallCpart;
+				auto *prevPipeSubcallTpart = gfctx.pipeSubcallTpart;
+				gfctx.pipeSubcallCpart = cpart;
+				gfctx.pipeSubcallTpart = &tpart;
+				cpart = gfctx.pipeSubcallTpart;
+				graphics(GRAPHICS_FUNC_SUBCALL_ARGS);
+				cpart = gfctx.pipeSubcallCpart;
+				gfctx.pipeSubcallCpart = prevPipeSubcallCpart;
+				gfctx.pipeSubcallTpart = prevPipeSubcallTpart;
 			}
 			else
 			{
-				Element::defaultGraphics(ren, cpart, nx, ny, pixel_mode, cola, colr, colg, colb, firea, firer, fireg, fireb);
+				Element::defaultGraphics(GRAPHICS_FUNC_SUBCALL_ARGS);
 			}
-
-			// Restore original particle data.
-			*cpart = tpart;
 		}
 		//*colr = PIXR(elements[t].pcolors);
 		//*colg = PIXG(elements[t].pcolors);
@@ -522,19 +543,19 @@ int Element_BVES_graphics(GRAPHICS_FUNC_ARGS)
 	return 0;
 }
 
-void Element_BVES_transfer_bves_to_part(Simulation * sim, Particle *bves, Particle *part, bool STOR)
+static void props_bves_to_part(const Particle *bves, Particle *part, bool STOR)
 {
+	auto &sd = SimulationData::CRef();
+	auto &elements = sd.elements;
 	// STOR also calls this function to move particles from STOR to PRTI
 	// PIPE was changed, so now PIPE and STOR don't use the same particle storage format
 	if (STOR)
 	{
 		part->type = TYP(bves->tmp);
-		bves->tmp = 0;
 	}
 	else
 	{
 		part->type = TYP(bves->ctype);
-		bves->ctype = 0;
 	}
 	part->temp = bves->temp;
 	part->life = bves->tmp2;
@@ -542,16 +563,26 @@ void Element_BVES_transfer_bves_to_part(Simulation * sim, Particle *bves, Partic
 	part->ctype = bves->tmp4;
     part->bio = bves->bio;
 
-	if (!(sim->elements[part->type].Properties & TYPE_ENERGY))
+	if (!(elements[part->type].Properties & TYPE_ENERGY))
 	{
 		part->vx = 0.0f;
 		part->vy = 0.0f;
 	}
-	else if (part->type == PT_PHOT && part->ctype == 0x40000000)
-		part->ctype = 0x3FFFFFFF;
 	part->tmp2 = 0;
 	part->flags = 0;
 	part->dcolour = 0;
+}
+
+void Element_BVES_transfer_bves_to_part(Simulation * sim, Particle *bves, Particle *part, bool STOR) {
+	props_bves_to_part(bves, part, STOR);
+	if (STOR)
+	{
+		bves->tmp = 0;
+	}
+	else
+	{
+		bves->ctype = 0;
+	}
 }
 
 static void transfer_part_to_bves(Particle *part, Particle *bves)
@@ -595,7 +626,7 @@ static void pushParticle(Simulation * sim, int i, int count, int original)
 	if( !(sim->parts[i].tmp&0x200) )
 	{
 		//normal random push
-		rndstore = RNG::Ref().gen();
+		rndstore = sim->rng.gen();
 		// RAND_MAX is at least 32767 on all platforms i.e. pow(8,5)-1
 		// so can go 5 cycles without regenerating rndstore
 		// (although now we use our own randomizer so maybe should reevaluate all the rndstore usages in every element)
@@ -607,14 +638,14 @@ static void pushParticle(Simulation * sim, int i, int count, int original)
 			rx = bpos_1_rx[rnd];
 			ry = bpos_1_ry[rnd];
 
-			if (BOUNDS_CHECK)
+			if (true)
 			{
 				
 				r = sim->pmap[y+ry][x+rx];
 
 				if (!r)
 					continue;
-				else if ((TYP(r)==PT_BVES || TYP(r) == PT_PPIP) && (sim->parts[ID(r)].tmp&PFLAG_COLORS) != notctype && !TYP(sim->parts[ID(r)].ctype))
+				else if ((TYP(r)==PT_BVES || TYP(r) == PT_PIPE || TYP(r) == PT_PPIP) && (sim->parts[ID(r)].tmp&PFLAG_COLORS) != notctype && !TYP(sim->parts[ID(r)].ctype))
 				{
 					transfer_bves_to_bves(sim->parts+i, sim->parts+(ID(r)), false);
 					if (ID(r) > original)

@@ -7,7 +7,7 @@ void Element::Element_BACT()
 {
 	Identifier = "DEFAULT_PT_BACT";
 	Name = "BACT";
-	Colour = PIXPACK(0xF433FF);
+	Colour = 0xF433FF_rgb;
 	MenuVisible = 1;
 	MenuSection = SC_BIO;
 	Enabled = 1;
@@ -62,23 +62,23 @@ void Element::Element_BACT()
 static int update(UPDATE_FUNC_ARGS)
 {
     // O2 use itself
-    Biology::UseO2(300, UPDATE_FUNC_IN);
+    Biology::UseO2(300, UPDATE_FUNC_SUBCALL_ARGS);
 	// Bacteria attack all other biological components
-	Biology::AttackBio(5, 2, 20, UPDATE_FUNC_IN);
+	Biology::AttackBio(5, 2, 20, UPDATE_FUNC_SUBCALL_ARGS);
 	// Damage from extreme heat or cold
-	Biology::DoHeatDamage(5, 323.15, 273, UPDATE_FUNC_IN);
+	Biology::DoHeatDamage(5, 323.15, 273, UPDATE_FUNC_SUBCALL_ARGS);
 	// Damage from lack of O2 or too much CO2
-	Biology::DoRespirationDamage(100, UPDATE_FUNC_IN);
+	Biology::DoRespirationDamage(100, UPDATE_FUNC_SUBCALL_ARGS);
 	// Radiation damage
-	Biology::DoRadiationDamage(2, 2, UPDATE_FUNC_IN);
+	Biology::DoRadiationDamage(2, 2, UPDATE_FUNC_SUBCALL_ARGS);
 	// Heal naturally
-	Biology::DoHealing(100, UPDATE_FUNC_IN);
+	Biology::DoHealing(100, UPDATE_FUNC_SUBCALL_ARGS);
 	// Grow into air
-	Biology::GrowInRange(100, 5, PT_NONE, UPDATE_FUNC_IN);
+	Biology::GrowInRange(100, 5, PT_NONE, UPDATE_FUNC_SUBCALL_ARGS);
 	// Grow onto dead tissue
-	Biology::GrowInRange(100, 5, PT_DT, UPDATE_FUNC_IN);
+	Biology::GrowInRange(100, 5, PT_DT, UPDATE_FUNC_SUBCALL_ARGS);
 	// Death check
-	Biology::HandleDeath(UPDATE_FUNC_IN);
+	Biology::HandleDeath(UPDATE_FUNC_SUBCALL_ARGS);
 
 	return 0;
 }
@@ -91,8 +91,7 @@ static int graphics(GRAPHICS_FUNC_ARGS)
     // C02
     int c = cpart->bio.co2;
 
-	int q = cpart->bio.o2;
-
+	// Air mix
 	int d = o - c;
 
 

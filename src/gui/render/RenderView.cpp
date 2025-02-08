@@ -1,28 +1,28 @@
 #include "RenderView.h"
-
 #include "simulation/ElementGraphics.h"
-
+#include "simulation/SimulationData.h"
+#include "simulation/Simulation.h"
 #include "graphics/Graphics.h"
 #include "graphics/Renderer.h"
-
+#include "graphics/VideoBuffer.h"
 #include "RenderController.h"
 #include "RenderModel.h"
-
 #include "gui/interface/Checkbox.h"
 #include "gui/interface/Button.h"
+#include "gui/game/GameController.h"
+#include "gui/game/GameView.h"
 
 class ModeCheckbox : public ui::Checkbox
 {
 public:
 	using ui::Checkbox::Checkbox;
-	unsigned int mode;
+	uint32_t mode;
 };
 
 RenderView::RenderView():
 	ui::Window(ui::Point(0, 0), ui::Point(XRES, WINDOWH)),
-	ren(NULL),
+	ren(nullptr),
 	toolTip(""),
-	toolTipPresence(0),
 	isToolTipFadingIn(false)
 {
 	auto addPresetButton = [this](int index, Icon icon, ui::Point offset, String tooltip) {
@@ -48,11 +48,9 @@ RenderView::RenderView():
 		renderModes.push_back(renderModeCheckbox);
 		renderModeCheckbox->mode = mode;
 		renderModeCheckbox->SetIcon(icon);
-		renderModeCheckbox->SetActionCallback({ [this, renderModeCheckbox] {
-			if (renderModeCheckbox->GetChecked())
-				c->SetRenderMode(renderModeCheckbox->mode);
-			else
-				c->UnsetRenderMode(renderModeCheckbox->mode);
+		renderModeCheckbox->SetActionCallback({ [this] {
+			auto renderMode = CalculateRenderMode();
+			c->SetRenderMode(renderMode);
 		} });
 		AddComponent(renderModeCheckbox);
 	};
@@ -70,10 +68,21 @@ RenderView::RenderView():
 		displayModeCheckbox->mode = mode;
 		displayModeCheckbox->SetIcon(icon);
 		displayModeCheckbox->SetActionCallback({ [this, displayModeCheckbox] {
+			auto displayMode = c->GetDisplayMode();
+			// Air display modes are mutually exclusive
+			if (displayModeCheckbox->mode & DISPLAY_AIR)
+			{
+				displayMode &= ~DISPLAY_AIR;
+			}
 			if (displayModeCheckbox->GetChecked())
-				c->SetDisplayMode(displayModeCheckbox->mode);
+			{
+				displayMode |= displayModeCheckbox->mode;
+			}
 			else
-				c->UnsetDisplayMode(displayModeCheckbox->mode);
+			{
+				displayMode &= ~displayModeCheckbox->mode;
+			}
+			c->SetDisplayMode(displayMode);
 		} });
 		AddComponent(displayModeCheckbox);
 	};
@@ -94,10 +103,17 @@ RenderView::RenderView():
 		colourModeCheckbox->mode = mode;
 		colourModeCheckbox->SetIcon(icon);
 		colourModeCheckbox->SetActionCallback({ [this, colourModeCheckbox] {
-			if(colourModeCheckbox->GetChecked())
-				c->SetColourMode(colourModeCheckbox->mode);
+			auto colorMode = c->GetColorMode();
+			// exception: looks like an independent set of settings but behaves more like an index
+			if (colourModeCheckbox->GetChecked())
+			{
+				colorMode = colourModeCheckbox->mode;
+			}
 			else
-				c->SetColourMode(0);
+			{
+				colorMode = 0;
+			}
+			c->SetColorMode(colorMode);
 		} });
 		AddComponent(colourModeCheckbox);
 	};
@@ -106,6 +122,18 @@ RenderView::RenderView():
 	addColourModeCheckbox(COLOUR_GRAD, IconGradient, ui::Point(307, 22), "Changes colors of elements slightly to show heat diffusing through them");
 	addColourModeCheckbox(COLOUR_BASC, IconBasic   , ui::Point(307,  4), "No special effects at all for anything, overrides all other options and deco");
 	line4 = 340;
+}
+
+uint32_t RenderView::CalculateRenderMode()
+{
+	uint32_t renderMode = 0;
+	for (auto &checkbox : renderModes)
+	{
+		if (checkbox->GetChecked())
+			renderMode |= checkbox->mode;
+	}
+
+	return renderMode;
 }
 
 void RenderView::OnMouseDown(int x, int y, unsigned button)
@@ -122,6 +150,12 @@ void RenderView::OnTryExit(ExitMethod method)
 void RenderView::NotifyRendererChanged(RenderModel * sender)
 {
 	ren = sender->GetRenderer();
+	rendererSettings = sender->GetRendererSettings();
+}
+
+void RenderView::NotifySimulationChanged(RenderModel * sender)
+{
+	sim = sender->GetSimulation();
 }
 
 void RenderView::NotifyRenderChanged(RenderModel * sender)
@@ -147,50 +181,47 @@ void RenderView::NotifyColourChanged(RenderModel * sender)
 {
 	for (size_t i = 0; i < colourModes.size(); i++)
 	{
-		auto colourMode = colourModes[i]->mode;
-		colourModes[i]->SetChecked(colourMode == sender->GetColourMode());
+		auto colorMode = colourModes[i]->mode;
+		colourModes[i]->SetChecked(colorMode == sender->GetColorMode());
 	}
 }
 
 void RenderView::OnDraw()
 {
 	Graphics * g = GetGraphics();
-	g->clearrect(-1, -1, WINDOWW+1, WINDOWH+1);
-	if(ren)
+	g->DrawFilledRect(WINDOW.OriginRect(), 0x000000_rgb);
+	auto *view = GameController::Ref().GetView();
+	view->PauseRendererThread();
+	ren->ApplySettings(*rendererSettings);
+	view->RenderSimulation(*sim, true);
+	view->AfterSimDraw(*sim);
+	for (auto y = 0; y < YRES; ++y)
 	{
-		ren->clearScreen(1.0f);
-		ren->RenderBegin();
-		ren->RenderEnd();
+		auto &video = ren->GetVideo();
+		std::copy_n(video.data() + video.Size().X * y, video.Size().X, g->Data() + g->Size().X * y);
 	}
-	g->draw_line(0, YRES, XRES-1, YRES, 200, 200, 200, 255);
-	g->draw_line(line1, YRES, line1, WINDOWH, 200, 200, 200, 255);
-	g->draw_line(line2, YRES, line2, WINDOWH, 200, 200, 200, 255);
-	g->draw_line(line3, YRES, line3, WINDOWH, 200, 200, 200, 255);
-	g->draw_line(line4, YRES, line4, WINDOWH, 200, 200, 200, 255);
-	g->draw_line(XRES, 0, XRES, WINDOWH, 255, 255, 255, 255);
+	g->DrawLine({ 0, YRES }, { XRES-1, YRES }, 0xC8C8C8_rgb);
+	g->DrawLine({ line1, YRES }, { line1, WINDOWH }, 0xC8C8C8_rgb);
+	g->DrawLine({ line2, YRES }, { line2, WINDOWH }, 0xC8C8C8_rgb);
+	g->DrawLine({ line3, YRES }, { line3, WINDOWH }, 0xC8C8C8_rgb);
+	g->DrawLine({ line4, YRES }, { line4, WINDOWH }, 0xC8C8C8_rgb);
+	g->DrawLine({ XRES, 0 }, { XRES, WINDOWH }, 0xFFFFFF_rgb);
 	if(toolTipPresence && toolTip.length())
 	{
-		g->drawtext(6, Size.Y-MENUSIZE-12, toolTip, 255, 255, 255, toolTipPresence>51?255:toolTipPresence*5);
+		g->BlendText({ 6, Size.Y-MENUSIZE-12 }, toolTip, 0xFFFFFF_rgb .WithAlpha(toolTipPresence>51?255:toolTipPresence*5));
 	}
 }
 
-void RenderView::OnTick(float dt)
+void RenderView::OnTick()
 {
 	if (isToolTipFadingIn)
 	{
 		isToolTipFadingIn = false;
-		if(toolTipPresence < 120)
-		{
-			toolTipPresence += int(dt*2)>1?int(dt*2):2;
-			if(toolTipPresence > 120)
-				toolTipPresence = 120;
-		}
+		toolTipPresence.SetTarget(120);
 	}
-	if(toolTipPresence>0)
+	else
 	{
-		toolTipPresence -= int(dt)>0?int(dt):1;
-		if(toolTipPresence<0)
-			toolTipPresence = 0;
+		toolTipPresence.SetTarget(0);
 	}
 }
 

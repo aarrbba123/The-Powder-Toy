@@ -1,17 +1,17 @@
 #include "simulation/ToolCommon.h"
 
-static int perform(Simulation * sim, Particle * cpart, int x, int y, int brushX, int brushY, float strength);
+static int perform(SimTool *tool, Simulation * sim, Particle * cpart, int x, int y, int brushX, int brushY, float strength);
 
 void SimTool::Tool_AMBP()
 {
 	Identifier = "DEFAULT_TOOL_AMBP";
 	Name = "AMBP";
-	Colour = PIXPACK(0xFFDD00);
+	Colour = 0xFFDD00_rgb;
 	Description = "Increases ambient air temperature.";
 	Perform = &perform;
 }
 
-static int perform(Simulation *sim, Particle *cpart, int x, int y, int brushX, int brushY, float strength)
+static int perform(SimTool *tool, Simulation *sim, Particle *cpart, int x, int y, int brushX, int brushY, float strength)
 {
 	if (!sim->aheat_enable)
 	{

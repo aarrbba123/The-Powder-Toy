@@ -8,15 +8,15 @@ void Element::Element_PSN()
 {
 	Identifier = "DEFAULT_PT_PSN";
 	Name = "PSN";
-	Colour = PIXPACK(0x009900);
+	Colour = 0x009900_rgb;
 	MenuVisible = 1;
 	MenuSection = SC_BIO;
 	Enabled = 1;
 
 	Advection = 0.6f;
 	AirDrag = 0.01f * CFDS;
-	AirLoss = 0.10; // sludge
-	Loss = 0.5;
+	AirLoss = 0.10f; // sludge
+	Loss = 0.5f;
 	Collision = 0.001f;
 	Gravity = 0.1f;
 	Diffusion = 0.00f;
@@ -52,12 +52,13 @@ void Element::Element_PSN()
 static int update(UPDATE_FUNC_ARGS)
 {
 	int r, rx, ry;
+	auto &sd = SimulationData::CRef();
 
-    rx =  RNG::Ref().between(-2, 2);
-    ry =  RNG::Ref().between(-2, 2);
+    rx =  sim->rng.between(-2, 2);
+    ry =  sim->rng.between(-2, 2);
 	r = pmap[y+ry][x+rx];
 	int ir = ID(r);
-	if (sim->elements[TYP(r)].Properties & TYPE_BIO){
+	if (sd.elements[TYP(r)].Properties & TYPE_BIO){
 		parts[ir].bio.health -= parts[i].tmp;
 		parts[i].life--;
 	}
@@ -72,12 +73,9 @@ static int update(UPDATE_FUNC_ARGS)
 static int graphics(GRAPHICS_FUNC_ARGS)
 {
     // Oxygen
-    int o = cpart->tmp;
+	// Newer versions use o2 instead of tmp
+	int o = cpart->bio.o2;
 
-    // C02
-    int c = cpart->bio.co2;
-
-	int q = cpart->bio.o2;
 	*colr = 0;
 	*colg = (int)fmax(9 * o, 75);;
 	*colb = 0;

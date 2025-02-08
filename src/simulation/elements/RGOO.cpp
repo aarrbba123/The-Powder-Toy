@@ -6,7 +6,7 @@ void Element::Element_RGOO()
 {
 	Identifier = "DEFAULT_PT_RGOO";
 	Name = "RGOO";
-	Colour = PIXPACK(0xaf0000);
+	Colour = 0xAF0000_rgb;
 	MenuVisible = 1;
 	MenuSection = SC_LIQUID;
 	Enabled = 1;
@@ -53,7 +53,7 @@ static int update(UPDATE_FUNC_ARGS)
 	int r, rx, ry;
 	for (rx=-1; rx<2; rx++)
 		for (ry=-1; ry<2; ry++)
-			if (BOUNDS_CHECK && (rx || ry))
+			if (rx || ry)
 			{
 				r = pmap[y+ry][x+rx];
 				
@@ -65,7 +65,7 @@ static int update(UPDATE_FUNC_ARGS)
 					continue;
 				}
 
-				if (!RNG::Ref().chance(parts[i].temp, MAX_TEMP))
+				if (!sim->rng.chance(parts[i].temp, MAX_TEMP))
 					continue;
 
 				sim->part_change_type(ID(r), x, y, PT_RGOO);

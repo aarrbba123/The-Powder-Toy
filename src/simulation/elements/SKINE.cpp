@@ -7,7 +7,7 @@ void Element::Element_SKINE()
 {
 	Identifier = "DEFAULT_PT_SKINE";
 	Name = "SKINE";
-	Colour = PIXPACK(0xE8C89B);
+	Colour = 0xE8C89B_rgb;
 	MenuVisible = 1;
 	MenuSection = SC_BIO;
 	Enabled = 1;
@@ -62,30 +62,30 @@ void Element::Element_SKINE()
 static int update(UPDATE_FUNC_ARGS)
 {
     // O2 use itself
-    Biology::UseO2(150, UPDATE_FUNC_IN);
+    Biology::UseO2(150, UPDATE_FUNC_SUBCALL_ARGS);
     // Diffuse resources
-	Biology::DiffuseResources(2, 2, UPDATE_FUNC_IN);
+	Biology::DiffuseResources(2, 2, UPDATE_FUNC_SUBCALL_ARGS);
     // Radiation damage
-	Biology::DoRadiationDamage(2, 2, UPDATE_FUNC_IN);
+	Biology::DoRadiationDamage(2, 2, UPDATE_FUNC_SUBCALL_ARGS);
 	// Damage from extreme heat or cold
 	// Skin is a bit more resilient against temperature
-	Biology::DoHeatDamage(20, 323.15, 273, UPDATE_FUNC_IN);
+	Biology::DoHeatDamage(20, 323.15, 273, UPDATE_FUNC_SUBCALL_ARGS);
 	// Damage from lack of O2 or too much CO2
-	Biology::DoRespirationDamage(100, UPDATE_FUNC_IN);
+	Biology::DoRespirationDamage(100, UPDATE_FUNC_SUBCALL_ARGS);
 	// Heal naturally
-	Biology::DoHealing(100, UPDATE_FUNC_IN);
+	Biology::DoHealing(100, UPDATE_FUNC_SUBCALL_ARGS);
 	// Death check
-	Biology::HandleDeath(UPDATE_FUNC_IN);
+	Biology::HandleDeath(UPDATE_FUNC_SUBCALL_ARGS);
 
 	return 0;
 }
 
 static int graphics(GRAPHICS_FUNC_ARGS)
 {
-	// Life mix
-	*colr = int(*colr * (cpart->bio.health) / 100.0f);
-	*colg = int(*colg * (cpart->bio.health) / 100.0f);
-	*colb = int(*colb * (cpart->bio.health) / 100.0f);
+	// Life mix + base colour
+	*colr = int(232 * (cpart->bio.health) / 200.0f);
+	*colg = int(200 * (cpart->bio.health) / 200.0f);
+	*colb = int(155 * (cpart->bio.health) / 200.0f);
 
 	return 0;
 }

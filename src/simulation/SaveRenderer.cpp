@@ -2,86 +2,44 @@
 
 #include "client/GameSave.h"
 
-#include "graphics/Graphics.h"
+#include "graphics/VideoBuffer.h"
 #include "graphics/Renderer.h"
 
 #include "Simulation.h"
+#include "SimulationData.h"
 
-SaveRenderer::SaveRenderer(){
-	g = new Graphics();
-	sim = new Simulation();
-	ren = new Renderer(g, sim);
-	ren->decorations_enable = true;
-	ren->blackDecorations = true;
+SaveRenderer::SaveRenderer()
+{
+	sim = std::make_unique<Simulation>();
+	ren = std::make_unique<Renderer>();
+	ren->sim = sim.get();
 }
 
-void SaveRenderer::Flush(int begin, int end)
+SaveRenderer::~SaveRenderer() = default;
+
+std::unique_ptr<VideoBuffer> SaveRenderer::Render(const GameSave *save, bool fire, RendererSettings rendererSettings)
 {
-	std::lock_guard<std::mutex> gx(renderMutex);
-	std::fill(ren->graphicscache + begin, ren->graphicscache + end, gcache_item());
-}
-
-VideoBuffer * SaveRenderer::Render(GameSave * save, bool decorations, bool fire, Renderer *renderModeSource)
-{
+	// this function usually runs on a thread different from where element info in SimulationData may be written, so we acquire a read-only lock on it
+	auto &sd = SimulationData::CRef();
+	std::shared_lock lk(sd.elementGraphicsMx);
 	std::lock_guard<std::mutex> gx(renderMutex);
 
-	ren->ResetModes();
-	if (renderModeSource)
-	{
-		ren->SetRenderMode(renderModeSource->GetRenderMode());
-		ren->SetDisplayMode(renderModeSource->GetDisplayMode());
-		ren->SetColourMode(renderModeSource->GetColourMode());
-	}
+	ren->ApplySettings(rendererSettings);
 
-	int width, height;
-	VideoBuffer * tempThumb = NULL;
-	width = save->blockWidth;
-	height = save->blockHeight;
-
-	g->Clear();
 	sim->clear_sim();
 
-	if(!sim->Load(save, true))
+	sim->Load(save, true, { 0, 0 });
+	ren->ClearAccumulation();
+	ren->Clear();
+	if (fire)
 	{
-		ren->decorations_enable = true;
-		ren->blackDecorations = !decorations;
-		pixel * pData = NULL;
-		pixel * dst;
-		pixel * src = g->vid;
-
-		ren->ClearAccumulation();
-
-		if (fire)
-		{
-	   		int frame = 15;
-			while(frame)
-			{
-				frame--;
-				ren->render_parts();
-				ren->render_fire();
-				ren->clearScreen(1.0f);
-			}
-		}
-
-		ren->RenderBegin();
-		ren->RenderEnd();
-
-
-		pData = (pixel *)malloc(PIXELSIZE * ((width*CELL)*(height*CELL)));
-		dst = pData;
-		for(int i = 0; i < height*CELL; i++)
-		{
-			memcpy(dst, src, (width*CELL)*PIXELSIZE);
-			dst+=(width*CELL);///PIXELSIZE;
-			src+=WINDOWW;
-		}
-		tempThumb = new VideoBuffer(pData, width*CELL, height*CELL);
-		free(pData);
+		ren->ApproximateAccumulation();
 	}
+	ren->RenderSimulation();
+
+	auto tempThumb = std::make_unique<VideoBuffer>(save->blockSize * CELL);
+	auto &video = ren->GetVideo();
+	tempThumb->BlendImage(video.data(), 0xFF, video.Size().OriginRect());
 
 	return tempThumb;
-}
-
-SaveRenderer::~SaveRenderer()
-{
 }
