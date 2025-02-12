@@ -9,6 +9,7 @@
 #include "Simulation.h"
 #include "SimulationData.h"
 #include "Biology.h"
+#include "BioRNG.h"
 #include "graphics/Renderer.h"
 #include "TransitionConstants.h"
 #include <algorithm>

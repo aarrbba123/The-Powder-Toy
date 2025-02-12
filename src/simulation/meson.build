@@ -10,6 +10,7 @@ simulation_files = files(
 	'SimulationData.cpp',
 	'Simulation.cpp',
 	'Biology.cpp',
+	'BioRNG.cpp',
 	'StructProperty.cpp',
 )
 

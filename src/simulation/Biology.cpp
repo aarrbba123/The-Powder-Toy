@@ -1,4 +1,5 @@
 #include "ElementCommon.h"
+#include "BioRNG.h"
 
 #define CHANCE(chance) sim->rng.chance(1, chance)
 
