@@ -70,12 +70,6 @@ void Element::Element_BVES()
 // 0x0001C000 reverse single pixel bves direction
 // 0x000E0000 BVES color data stored here
 
-constexpr int PFLAG_NORMALSPEED            = 0x00010000;
-constexpr int PFLAG_INITIALIZING           = 0x00020000; // colors haven't been set yet
-constexpr int PFLAG_COLOR_RED              = 0x00040000;
-constexpr int PFLAG_COLOR_GREEN            = 0x00080000;
-constexpr int PFLAG_COLOR_BLUE             = 0x000C0000;
-constexpr int PFLAG_COLORS                 = 0x000C0000;
 
 constexpr int PPIP_TMPFLAG_REVERSED        = 0x01000000;
 constexpr int PPIP_TMPFLAG_PAUSED          = 0x02000000;
