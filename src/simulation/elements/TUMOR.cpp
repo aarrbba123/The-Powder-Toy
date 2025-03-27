@@ -65,10 +65,10 @@ static int update(UPDATE_FUNC_ARGS)
 
 	int r, rx, ry;
 
-    rx =  sim->rng.between(-2, 2);
-    ry =  sim->rng.between(-2, 2);
+    rx =  sim->biorng.RBetween(2);
+    ry =  sim->biorng.RBetween(2);
     
-    if (sim->rng.chance(1, 2000) && (rx || ry))
+    if (sim->biorng.Chance(2000) && (rx || ry))
     {
         r = pmap[y+ry][x+rx];
 		int target = ID(r);
@@ -81,7 +81,7 @@ static int update(UPDATE_FUNC_ARGS)
 			}	
         }
     }
-	if (sim->rng.chance(1, 100)){
+	if (sim->biorng.Chance(100)){
 
 		r = pmap[y+ry][x+rx];
 		int target = ID(r);

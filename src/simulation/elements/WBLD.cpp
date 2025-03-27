@@ -71,9 +71,9 @@ static int update(UPDATE_FUNC_ARGS)
 	// Fight disease
 	if (Biology::AttackDisease(1, 2, 50, UPDATE_FUNC_SUBCALL_ARGS)){
 		// If there was disease, multiply 
-		if (sim->rng.chance(1, 100)){
-			rx =  sim->rng.between(-2, 2);
-			ry =  sim->rng.between(-2, 2);
+		if (sim->biorng.Chance(100)){
+			rx =  sim->biorng.RBetween(2);
+			ry =  sim->biorng.RBetween(2);
 
 			r = pmap[y+ry][x+rx];
 
@@ -98,8 +98,8 @@ static int update(UPDATE_FUNC_ARGS)
 		}
 	}
 
-    rx =  sim->rng.between(-4, 4);
-    ry =  sim->rng.between(-4, 4);
+    rx =  sim->biorng.RBetween(4);
+    ry =  sim->biorng.RBetween(4);
     
     if (rx || ry)
     {

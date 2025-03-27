@@ -1,7 +1,6 @@
 #include "ElementCommon.h"
-#include "BioRNG.h"
 
-#define CHANCE(chance) sim->rng.chance(1, chance)
+#define CHANCE(chance) sim->biorng.Chance(chance)
 
 Biology::Biology()
 {
@@ -25,8 +24,8 @@ void Biology::UseO2(int chance, UPDATE_FUNC_ARGS){
 void Biology::AttackBio(int chance, int range, int damage, UPDATE_FUNC_ARGS){
 	if (!CHANCE(chance)) return;
 
-	int rand_x =  sim->rng.between(-range, range);
-	int rand_y =  sim->rng.between(-range, range);
+	int rand_x =  sim->biorng.RBetween(range);
+	int rand_y =  sim->biorng.RBetween(range);
 
 	if (!(rand_x || rand_y)) return;
 
@@ -140,8 +139,8 @@ void Biology::GrowInRange(int chance, int range, int grow_on, UPDATE_FUNC_ARGS){
 	// Require over 50 glucose
 	if (!(parts[i].bio.glucose > 50)) return;
 
-	int rand_x =  sim->rng.between(-range, range);
-	int rand_y =  sim->rng.between(-range, range);
+	int rand_x =  sim->biorng.RBetween(range);
+	int rand_y =  sim->biorng.RBetween(range);
 
 	if (!(rand_x || rand_y)) return;
 
@@ -174,8 +173,8 @@ void Biology::GrowInRange(int chance, int range, int grow_on, UPDATE_FUNC_ARGS){
 void Biology::DiffuseResources(int chance, int range, UPDATE_FUNC_ARGS){
 	if (!CHANCE(chance)) return;
 
-	int rand_x =  sim->rng.between(-range, range);
-	int rand_y =  sim->rng.between(-range, range);
+	int rand_x =  sim->biorng.RBetween(range);
+	int rand_y =  sim->biorng.RBetween(range);
 
 	if (!(rand_x || rand_y)) return; // I seriously don't know what this is.
 
@@ -238,8 +237,8 @@ void Biology::DoRadiationDamage(int chance, int range, UPDATE_FUNC_ARGS){
 
 	int rand_x, rand_y;
 
-	rand_x = sim->rng.between(-range, range);
-	rand_y = sim->rng.between(-range, range);
+	rand_x = sim->biorng.RBetween(range);
+	rand_y = sim->biorng.RBetween(range);
 
 	if (!(rand_x || rand_y)) return;
 
@@ -264,7 +263,7 @@ void Biology::DoRadiationDamage(int chance, int range, UPDATE_FUNC_ARGS){
 
 			parts[i].bio.radDamage++;
 			parts[i].bio.health--;
-			if (sim->rng.chance(parts[i].bio.radDamage, 100000)){
+			if (sim->biorng.Chance(parts[i].bio.radDamage, 100000)){
 				sim->part_change_type(i, x, y, PT_TUMOR);
 			}
 		}
@@ -276,8 +275,8 @@ bool Biology::TryCollect(int chance, int range, int type, UPDATE_FUNC_ARGS){
 
 	int rand_x, rand_y;
 
-	rand_x =  sim->rng.between(-range, range);
-	rand_y =  sim->rng.between(-range, range);
+	rand_x =  sim->biorng.RBetween(range);
+	rand_y =  sim->biorng.RBetween(range);
 
 	if (!(rand_x || rand_y)) return false;
 
@@ -298,8 +297,8 @@ void Biology::StealResources(int chance, int range, UPDATE_FUNC_ARGS){
 
 	int rand_x, rand_y;
 
-	rand_x = sim->rng.between(-range, range);
-	rand_y = sim->rng.between(-range, range);
+	rand_x = sim->biorng.RBetween(range);
+	rand_y = sim->biorng.RBetween(range);
 
 	if (!(rand_x || rand_y)) return;
 
@@ -331,8 +330,8 @@ bool Biology::AttackDisease(int chance, int range, int damage, UPDATE_FUNC_ARGS)
 
 	int rand_x, rand_y;
 
-	rand_x =  sim->rng.between(-range, range);
-	rand_y =  sim->rng.between(-range, range);
+	rand_x =  sim->biorng.RBetween(range);
+	rand_y =  sim->biorng.RBetween(range);
 
 	if (!(rand_x || rand_y)) return false;
 

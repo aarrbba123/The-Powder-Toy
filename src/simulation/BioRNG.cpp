@@ -1,6 +1,6 @@
 #include "ElementCommon.h"
 
-#define BIORNG_OVERUSED 120
+#define BIORNG_OVERUSED 512
 #define BIORNG_SHIFT(val) val & 0xF
 
 BioRNG::BioRNG() {
@@ -15,10 +15,9 @@ void BioRNG::RegenerateRNG() {
 }
 
 // Replaces rx & ry's between(). Melts brains.
-// Please note that shift is used to shift bitwise.
-int BioRNG::RBetween(int range) {
+int BioRNG::RBetween(unsigned int range) {
     int* val = (int*) &this->rngVal;
-    int ret = *val % (range * 2);
+    int ret = static_cast<int>(*val % (range * 2 + 1U)) - range;
     *val = *val >> BIORNG_SHIFT(*val);
     this->useCount++;
     OverusedCheck();
@@ -27,7 +26,7 @@ int BioRNG::RBetween(int range) {
 
 // RBetween's cousin
 int BioRNG::Between(int lower, int upper) {
-    int* val = (int*) this->rngVal;
+    int* val = (int*) &this->rngVal;
     int num = *val;
     *val = *val >> BIORNG_SHIFT(*val);
     this->useCount++;
@@ -40,6 +39,17 @@ bool BioRNG::Chance(unsigned int number) {
     int* val = (int*) &this->rngVal;
     bool ret = *val % number < 1;
     *val = *val >> BIORNG_SHIFT(*val);
+    this->useCount++;
+    OverusedCheck();
+    return ret;
+}
+
+// Gamblecore 2
+bool BioRNG::Chance(int numerator, unsigned int denominator) {
+    if (numerator < 0)
+        return false;
+    int* val = (int*) &this->rngVal;
+    bool ret = *val % denominator < static_cast<unsigned int>(numerator);
     this->useCount++;
     OverusedCheck();
     return ret;
