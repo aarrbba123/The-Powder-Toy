@@ -1,7 +1,7 @@
 #include "ElementCommon.h"
 
-#define BIORNG_OVERUSED 512
-#define BIORNG_SHIFT(val) val & 0xF
+#define BIORNG_OVERUSED 8192
+#define BIORNG_MASK(val) val & 0b1111
 
 BioRNG::BioRNG() {
     this->PureRNG = RNG();
@@ -18,7 +18,7 @@ void BioRNG::RegenerateRNG() {
 int BioRNG::RBetween(unsigned int range) {
     int* val = (int*) &this->rngVal;
     int ret = static_cast<int>(*val % (range * 2 + 1U)) - range;
-    *val = *val >> BIORNG_SHIFT(*val);
+    *val = *val >> BIORNG_MASK(*val);
     this->useCount++;
     OverusedCheck();
     return ret;
@@ -28,7 +28,7 @@ int BioRNG::RBetween(unsigned int range) {
 int BioRNG::Between(int lower, int upper) {
     int* val = (int*) &this->rngVal;
     int num = *val;
-    *val = *val >> BIORNG_SHIFT(*val);
+    *val = *val >> BIORNG_MASK(*val);
     this->useCount++;
     OverusedCheck();
     return static_cast<int>(num % ((unsigned int)(upper) - (unsigned int)(lower) + 1U)) + lower;
@@ -38,7 +38,7 @@ int BioRNG::Between(int lower, int upper) {
 bool BioRNG::Chance(unsigned int number) {
     int* val = (int*) &this->rngVal;
     bool ret = *val % number < 1;
-    *val = *val >> BIORNG_SHIFT(*val);
+    *val = *val >> BIORNG_MASK(*val);
     this->useCount++;
     OverusedCheck();
     return ret;

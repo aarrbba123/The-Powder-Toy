@@ -18,5 +18,5 @@ class BioRNG
 
     protected:
         void OverusedCheck();
-        unsigned int useCount;
+        unsigned short useCount;
 };
