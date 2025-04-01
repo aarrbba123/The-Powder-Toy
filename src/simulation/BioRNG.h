@@ -12,11 +12,12 @@ class BioRNG
         int Between(int lower, int upper);
         bool Chance(unsigned int number);
         bool Chance(int numerator, unsigned int denominator);
-        void RegenerateRNG();
+        void inline RegenerateRNG();
         RNG PureRNG;
         unsigned int rngVal;
 
     protected:
         void OverusedCheck();
+        int Next();
         unsigned short useCount;
 };
