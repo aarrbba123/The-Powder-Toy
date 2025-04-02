@@ -68,8 +68,8 @@ static int update(UPDATE_FUNC_ARGS)
 
 	int rx, ry, r;
 
-	rx =  sim->biorng.RBetween(2);
-    ry =  sim->biorng.RBetween(2);
+	rx =  sim->rng.between(-2, 2);
+    ry =  sim->rng.between(-2, 2);
 
     // Ensure sufficient material for growth
     if (parts[i].bio.o2 > 10){
@@ -94,8 +94,8 @@ static int update(UPDATE_FUNC_ARGS)
                             f_meat = true;
 
                             // Try to grow in one random surrounding spot
-                            int rrx = sim->biorng.RBetween(2);
-                            int rry = sim->biorng.RBetween(2);
+                            int rrx = sim->rng.between(-2, 2);
+                            int rry = sim->rng.between(-2, 2);
 
                             int rr = pmap[y+rry][x+rrx];
                             if (!rr){

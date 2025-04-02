@@ -77,7 +77,7 @@ static int update(UPDATE_FUNC_ARGS)
 	// Death check
 	Biology::HandleDeath(UPDATE_FUNC_SUBCALL_ARGS);
 
-    if (sim->biorng.Chance(100)){
+    if (sim->rng.chance(1, 100)){
         if (parts[i].bio.glucose > 2 && parts[i].bio.o2 > 5 && parts[i].bio.health > 75) {
 
             int r = pmap[y-1][x];

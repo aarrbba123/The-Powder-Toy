@@ -82,8 +82,8 @@ static int update(UPDATE_FUNC_ARGS)
         // Needs to be somewhat healthy to generate acid
         if (sim->rng.chance(1, 100)){
             // Generate stomach acid
-            int rand_x =  sim->biorng.RBetween(1);
-            int rand_y =  sim->biorng.RBetween(1);
+            int rand_x =  sim->rng.between(-1, 1);
+            int rand_y =  sim->rng.between(-1, 1);
 
             if (rand_x || rand_y){ 
 
@@ -95,7 +95,7 @@ static int update(UPDATE_FUNC_ARGS)
                 }
             }
             // SQUEEZE the food
-            sim->pv[y/CELL][x/CELL] = sim->biorng.RBetween(5);
+            sim->pv[y/CELL][x/CELL] = sim->rng.between(-5, 5);
         }
     }
 

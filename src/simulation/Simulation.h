@@ -9,7 +9,6 @@
 #include "AccessProperty.h"
 #include "CoordStack.h"
 #include "common/tpt-rand.h"
-#include "BioRNG.h"
 #include "gravity/Gravity.h"
 #include "graphics/RendererFrame.h"
 #include "Element.h"
@@ -106,7 +105,6 @@ public:
 	std::unique_ptr<Air> air;
 
 	RNG rng;
-	BioRNG biorng;
 
 	int replaceModeSelected = 0;
 	int replaceModeFlags = 0;
